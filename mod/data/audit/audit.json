@@ -1,0 +1,2984 @@
+{
+  "prefixes": [
+    {
+      "name": "Legendary",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Godly",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Demonic",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Superior",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Forceful",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Hurtful",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Zealous",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Keen",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Volatile",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Damaged",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Shoddy",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Broken",
+      "note": "",
+      "disposition": "drop",
+      "family": "magnitude",
+      "why": "Scales a host relic's numbers. There is no host relic in the tree."
+    },
+    {
+      "name": "Thorned",
+      "note": "Thorns 1 at combat start",
+      "disposition": "port",
+      "effect": "start_thorns",
+      "family": "companion"
+    },
+    {
+      "name": "Quicksilver",
+      "note": "1 damage to all enemies each turn",
+      "disposition": "port",
+      "effect": "turn_ping_damage",
+      "family": "companion"
+    },
+    {
+      "name": "Anchored",
+      "note": "Block 3 at combat start",
+      "disposition": "port",
+      "effect": "start_block",
+      "family": "companion"
+    },
+    {
+      "name": "Vital",
+      "note": "Heal 1 on turn 1",
+      "disposition": "port",
+      "effect": "start_heal",
+      "family": "companion"
+    },
+    {
+      "name": "Rhythmic",
+      "note": "+1 energy every 4 turns",
+      "disposition": "port",
+      "effect": "energy_every_n_turns",
+      "family": "companion"
+    },
+    {
+      "name": "Insightful",
+      "note": "Draw 1 card when first hit",
+      "disposition": "port",
+      "effect": "draw_on_first_hit",
+      "family": "companion"
+    },
+    {
+      "name": "Mighty",
+      "note": "Strength +1 on turn 3",
+      "disposition": "port",
+      "effect": "start_strength",
+      "family": "companion"
+    },
+    {
+      "name": "Intimidating",
+      "note": "Vulnerable 1 to all enemies on turn 2",
+      "disposition": "port",
+      "effect": "start_vulnerable_enemies",
+      "family": "companion"
+    },
+    {
+      "name": "Ferocious",
+      "note": "Vigor 2 on turn 1",
+      "disposition": "port",
+      "effect": "start_vigor",
+      "family": "companion"
+    },
+    {
+      "name": "Bladed",
+      "note": "1 damage to all enemies per 4 skills in one turn",
+      "disposition": "port",
+      "effect": "skill_damage_all",
+      "family": "companion"
+    },
+    {
+      "name": "Relentless",
+      "note": "Strength +1 per 4 attacks in one turn",
+      "disposition": "port",
+      "effect": "attack_strength",
+      "family": "companion"
+    },
+    {
+      "name": "Tempered",
+      "note": "Block 1 if you end your turn with no Block",
+      "disposition": "port",
+      "effect": "end_turn_no_block",
+      "family": "companion"
+    },
+    {
+      "name": "Gusting",
+      "note": "Block 1 per 4 attacks in one turn",
+      "disposition": "port",
+      "effect": "attack_block",
+      "family": "companion"
+    },
+    {
+      "name": "Darting",
+      "note": "Dexterity +1 per 4 attacks in one turn",
+      "disposition": "port",
+      "effect": "attack_dexterity",
+      "family": "companion"
+    },
+    {
+      "name": "Supple",
+      "note": "Dexterity +1 on turn 2",
+      "disposition": "port",
+      "effect": "start_dexterity",
+      "family": "companion"
+    },
+    {
+      "name": "Accelerating",
+      "note": "+1 energy every 12 attacks",
+      "disposition": "port",
+      "effect": "energy_per_attacks",
+      "family": "companion"
+    },
+    {
+      "name": "Cursed",
+      "note": "Weak 1 to self at combat start",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Cumbersome",
+      "note": "Dexterity -1 to self on turn 1",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Fickle",
+      "note": "25% each turn: a random debuff 1 to self",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Overloaded",
+      "note": "Vulnerable 1 to self after 6 cards in one turn",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Retaining",
+      "note": "At the end of your turn, Retain a random card in your hand",
+      "disposition": "port",
+      "effect": "retain_random",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Searing",
+      "note": "When you play a card, 25% chance it gains Exhaust (takes effect from its next play)",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Echoing",
+      "note": "Each turn, a random card in your hand gains Replay 1. Playing that card gives you Vulnerable 1 and Frail 1",
+      "disposition": "port",
+      "effect": "replay_grant",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Tainted",
+      "note": "Adds a Dazed to your draw pile each turn",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Festering",
+      "note": "Adds 2 Wounds to your discard at combat start",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Smoldering",
+      "note": "Adds a Burn to your draw pile at combat start",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Hollow",
+      "note": "Adds a Void to your draw pile at combat start",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Eroding",
+      "note": "Each turn, move one enemy power 1 toward zero (buffs and debuffs alike)",
+      "disposition": "port",
+      "effect": "enemy_strip",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Exposing",
+      "note": "Vulnerable 1 to one enemy and yourself at combat start",
+      "disposition": "port",
+      "effect": "symmetric_vulnerable",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Enervating",
+      "note": "Weak 1 to one enemy and yourself at combat start",
+      "disposition": "port",
+      "effect": "symmetric_weak",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Chaotic",
+      "note": "Each turn, 50% chance: a random debuff (Vulnerable / Weak / Frail) to one enemy or one player",
+      "disposition": "port",
+      "effect": "random_debuff",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Resonant",
+      "note": "When you gain Strength or Dexterity, gain 1 more of it (up to 3/turn)",
+      "disposition": "port",
+      "effect": "gain_amplify",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Obstinate",
+      "note": "When an enemy reduces your Strength or Dexterity, gain that amount instead",
+      "disposition": "port",
+      "effect": "loss_invert",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Discharging",
+      "note": "Whenever you gain bonus Energy, deal 4 damage to all enemies",
+      "disposition": "port",
+      "effect": "energy_discharge",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Immolating",
+      "note": "Lose 5 HP at combat start, but gain 1 bonus Energy each turn",
+      "disposition": "port",
+      "effect": "energy_for_hp",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Overclocked",
+      "note": "Permanently lose 1 Max HP at combat start, but gain 1 bonus Energy each turn",
+      "disposition": "port",
+      "effect": "energy_for_max_hp",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Adrenal",
+      "note": "Whenever you take unblocked damage from an enemy, 25% chance to gain 1 bonus Energy",
+      "disposition": "port",
+      "effect": "hit_energy_chance",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Catalytic",
+      "note": "Your other relics' prefixes proc twice as often in combat — curses included",
+      "disposition": "port",
+      "effect": "proc_double",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Priming",
+      "note": "Your other relics' prefixes proc 10% more often in combat (curses included)",
+      "disposition": "port",
+      "effect": "proc_boost",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Empowering",
+      "note": "Your other relics' probabilistic combat effects get a second roll — they fire if either succeeds (curses included)",
+      "disposition": "port",
+      "effect": "proc_reroll",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Cursebound",
+      "note": "At combat start, gain Strength / Dexterity / Intangible scaled by how many curses you carry",
+      "disposition": "port",
+      "effect": "curse_count_ramp",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Studious",
+      "note": "The first time you play a Power card each combat, draw 2 cards",
+      "disposition": "port",
+      "effect": "power_first_draw",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Overflowing",
+      "note": "When you play a Power card, gain 1 Energy (once per turn)",
+      "disposition": "port",
+      "effect": "power_energy",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Cunning",
+      "note": "When you play a Skill card, 25% chance to draw a card",
+      "disposition": "port",
+      "effect": "skill_draw_chance",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Tenacious",
+      "note": "When a card would be exhausted, 25% chance it is discarded instead",
+      "disposition": "port",
+      "effect": "exhaust_dodge",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Persistent",
+      "note": "An Ethereal card that would exhaust is discarded instead — it survives",
+      "disposition": "port",
+      "effect": "ethereal_save",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Warding",
+      "note": "Gain 1 Artifact at combat start (negates the next debuff)",
+      "disposition": "port",
+      "effect": "start_artifact",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Warded",
+      "note": "Gain 1 Buffer at combat start (negates the next instance of damage)",
+      "disposition": "port",
+      "effect": "start_buffer",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Afterimage",
+      "note": "Gain 1 Blur at combat start (Block isn't lost at your next turn start)",
+      "disposition": "port",
+      "effect": "start_blur",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Plundering",
+      "note": "Gain 3 gold each time you kill an enemy",
+      "disposition": "port",
+      "effect": "kill_gold",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Contagious",
+      "note": "When you kill a Vulnerable enemy, its debuffs (Vulnerable, Weak, Frail, Poison) spread to a random other enemy",
+      "disposition": "port",
+      "effect": "spread_debuffs_on_kill",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Covetous",
+      "note": "Merchant prices are 20% higher",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Alchemical",
+      "note": "When you use a potion, gain 4 Block",
+      "disposition": "port",
+      "effect": "potion_block",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Fermented",
+      "note": "When you use a potion, gain 1 Strength",
+      "disposition": "port",
+      "effect": "potion_strength",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Distilled",
+      "note": "When you use a potion, gain 1 Dexterity",
+      "disposition": "port",
+      "effect": "potion_dexterity",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Corrosive",
+      "note": "When you use a potion, apply 1 Vulnerable to all enemies",
+      "disposition": "port",
+      "effect": "potion_vulnerable",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Diluting",
+      "note": "When you use a potion, apply 1 Weak to all enemies",
+      "disposition": "port",
+      "effect": "potion_weak",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Effervescent",
+      "note": "When you use a potion, 25% chance to gain 1 Buffer",
+      "disposition": "port",
+      "effect": "potion_buffer",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Concentrated",
+      "note": "Your potion-use prefix effects are doubled",
+      "disposition": "port",
+      "effect": "potion_double",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Cornered",
+      "note": "While at 50% max HP or below, draw 1 extra card each turn",
+      "disposition": "port",
+      "effect": "low_hp_draw",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Bribing",
+      "note": "Enemy damage you take is reduced by 1, spending 5 gold each time (no reduction while broke)",
+      "disposition": "port",
+      "effect": "gold_armor",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Bolstering",
+      "note": "Your combat-start defensive prefixes (Warding/Warded/Afterimage) grant +1",
+      "disposition": "port",
+      "effect": "start_power_boost",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Refined",
+      "note": "Each of your potion-use prefix effects is increased by 1",
+      "disposition": "port",
+      "effect": "potion_boost",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Attuned",
+      "note": "At combat start, gain 2 Block per other forged relic you carry (max 8)",
+      "disposition": "port",
+      "effect": "block_per_relic",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Renewing",
+      "note": "The first time your HP drops to 50% or below in a combat, gain 8 Block (once per combat)",
+      "disposition": "port",
+      "effect": "second_wind_block",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Regenerating",
+      "note": "Gain 2 Regen at combat start (heal some HP each turn)",
+      "disposition": "port",
+      "effect": "start_regen",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Finishing",
+      "note": "Gain 3 Block each time you kill an enemy",
+      "disposition": "port",
+      "effect": "kill_block",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Enduring",
+      "note": "From the 5th turn of combat onward, gain 1 Strength each turn",
+      "disposition": "port",
+      "effect": "enduring_strength",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Preemptive",
+      "note": "Draw 1 extra card on the first turn of combat",
+      "disposition": "port",
+      "effect": "first_turn_draw",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Executing",
+      "note": "Deal 25% more damage to enemies at 20% HP or below",
+      "disposition": "port",
+      "effect": "execute_bonus",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Forging",
+      "note": "Each time you obtain a relic, reforge one other relic you carry (its curse charge builds)",
+      "disposition": "drop",
+      "family": "relic-system",
+      "why": "Re-forges other relics when you obtain a relic; the imbue/reforge system is removed; the tree replaces it and this mod is Relic Forge's successor (decided)."
+    },
+    {
+      "name": "Cursefed",
+      "note": "When you draw a Curse card, gain 1 Strength or Dexterity (once per turn)",
+      "disposition": "port",
+      "effect": "curse_draw_stat",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Gilded",
+      "note": "At combat start, gain 1 Strength per 300 gold",
+      "disposition": "port",
+      "effect": "gold_strength",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Taxing",
+      "note": "At combat start, lose 1 gold per card in your deck",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Honed",
+      "note": "At combat start, {0}% chance to gain 1 Strength",
+      "disposition": "port",
+      "effect": "start_strength",
+      "family": "fallback"
+    },
+    {
+      "name": "Bulwarked",
+      "note": "At combat start, {0}% chance to gain 3 Block",
+      "disposition": "port",
+      "effect": "start_block",
+      "family": "fallback"
+    },
+    {
+      "name": "Nimble",
+      "note": "At combat start, {0}% chance to gain 1 Dexterity",
+      "disposition": "port",
+      "effect": "start_dexterity",
+      "family": "fallback"
+    },
+    {
+      "name": "Barbed",
+      "note": "At combat start, {0}% chance to gain 2 Thorns",
+      "disposition": "port",
+      "effect": "start_thorns",
+      "family": "fallback"
+    },
+    {
+      "name": "Sapped",
+      "note": "At combat start, {0}% chance to gain 1 Weak",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Wilted",
+      "note": "At combat start, {0}% chance to gain 1 Frail",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Exposed",
+      "note": "At combat start, {0}% chance to gain 1 Vulnerable",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Enervated",
+      "note": "At combat start, {0}% chance to lose 1 Strength",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Sluggish",
+      "note": "At combat start, {0}% chance to lose 1 Dexterity",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Roused",
+      "note": "Vigor 3 at combat start",
+      "disposition": "port",
+      "effect": "start_vigor",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Invigorated",
+      "note": "Gain 1 Vigor each turn",
+      "disposition": "port",
+      "effect": "turn_vigor",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Quenched",
+      "note": "When Vigor is consumed, each point consumed has a 15% chance to grant 1 Strength",
+      "disposition": "port",
+      "effect": "vigor_strength_pct",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Bracing",
+      "note": "When Vigor is consumed, each point consumed has a 25% chance to gain 2 Block",
+      "disposition": "port",
+      "effect": "vigor_block_pct",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Rending",
+      "note": "When Vigor is consumed, each point consumed has a 20% chance to apply 1 Vulnerable to a random enemy",
+      "disposition": "port",
+      "effect": "vigor_vulnerable_pct",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Withering",
+      "note": "When Vigor is consumed, each point consumed has a 20% chance to apply 1 Weak to a random enemy",
+      "disposition": "port",
+      "effect": "vigor_weak_pct",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Stoking",
+      "note": "When Vigor is consumed, each point consumed has a 10% chance to gain 1 Energy",
+      "disposition": "port",
+      "effect": "vigor_energy_pct",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Frenzied",
+      "note": "Your other Vigor-consume prefixes proc twice as often — but when you consume Vigor, 5% chance to give yourself Frail/Vulnerable/Weak 1, and 1% chance to lose 1 Strength or Dexterity",
+      "disposition": "port",
+      "effect": "vigor_proc_double",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Waning",
+      "note": "When you consume Vigor, 10% chance to lose 1 Strength",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Surging",
+      "note": "Whenever you gain Vigor, gain 1 more (up to 3 times per turn)",
+      "disposition": "port",
+      "effect": "vigor_gain_amplify",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Wellspring",
+      "note": "When Vigor is consumed, each point consumed has a 20% chance to gain 1 Regen",
+      "disposition": "port",
+      "effect": "vigor_regen_pct",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Congealing",
+      "note": "At the end of your turn, convert all unused Vigor into an equal amount of Block",
+      "disposition": "port",
+      "effect": "vigor_unused_to_block",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Evolving",
+      "note": "At the end of your turn, consume all unused Vigor; each point consumed has an 18% chance to grant 1 Strength",
+      "disposition": "port",
+      "effect": "vigor_unused_strength_pct",
+      "family": "gamble/other"
+    },
+    {
+      "name": "Cindered",
+      "note": "Whenever a card is exhausted, gain 2 Block",
+      "disposition": "port",
+      "effect": "exhaust_block",
+      "family": "character"
+    },
+    {
+      "name": "Bloodforged",
+      "note": "The first time you lose HP each combat, gain 2 Strength",
+      "disposition": "port",
+      "effect": "first_hp_loss_strength",
+      "family": "character"
+    },
+    {
+      "name": "Gouging",
+      "note": "When you apply Vulnerable to an enemy, 25% chance to apply 1 more",
+      "disposition": "port",
+      "effect": "vulnerable_extra_chance",
+      "family": "character"
+    },
+    {
+      "name": "Retaliating",
+      "note": "At turn start, gain Vigor equal to half the HP you lost since your last turn (minimum 1 if any)",
+      "disposition": "port",
+      "effect": "hp_lost_vigor",
+      "family": "character"
+    },
+    {
+      "name": "Mirrored",
+      "note": "When you gain Strength, 25% chance a random enemy gains 1 Strength",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Lingering",
+      "note": "When a card would be exhausted, 25% chance it is discarded instead",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Karmic",
+      "note": "When you apply Vulnerable to an enemy, 25% chance to gain 1 Vulnerable yourself",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Envenomed",
+      "note": "When you apply Poison to an enemy, 50% chance to apply 1 more",
+      "disposition": "port",
+      "effect": "poison_extra_chance",
+      "family": "character"
+    },
+    {
+      "name": "Flurrying",
+      "note": "When you play a Shiv, 25% chance to add a Shiv to your hand",
+      "disposition": "port",
+      "effect": "shiv_duplicate_chance",
+      "family": "character"
+    },
+    {
+      "name": "Cycling",
+      "note": "When you discard a card, draw a card",
+      "disposition": "port",
+      "effect": "discard_draw",
+      "family": "character"
+    },
+    {
+      "name": "Retrieving",
+      "note": "When a Shiv is exhausted, 25% chance it returns to your hand",
+      "disposition": "port",
+      "effect": "shiv_return_chance",
+      "family": "character"
+    },
+    {
+      "name": "Slippery",
+      "note": "At the start of each turn, discard a random card",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Toxic",
+      "note": "Poison 3 to yourself at combat start",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Dulled",
+      "note": "Poison you apply cannot stack an enemy above 6 Poison",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Focused",
+      "note": "The first time you gain Focus in combat, gain 1 more Focus",
+      "disposition": "port",
+      "effect": "first_focus_bonus",
+      "family": "character"
+    },
+    {
+      "name": "Amplified",
+      "note": "When you Channel an orb, 25% chance to Channel a random orb",
+      "disposition": "port",
+      "effect": "orb_channel_chance",
+      "family": "character"
+    },
+    {
+      "name": "Supercharged",
+      "note": "While your orb slots are full, gain 1 Focus (lost while not full)",
+      "disposition": "port",
+      "effect": "focus_when_full",
+      "family": "character"
+    },
+    {
+      "name": "Shorted",
+      "note": "Focus -2 at combat start",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Polarized",
+      "note": "If you end your turn with your orb slots all empty or all full, lose 1 Energy next turn",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Preheated",
+      "note": "Channel a random orb at combat start",
+      "disposition": "port",
+      "effect": "start_channel_orb",
+      "family": "character"
+    },
+    {
+      "name": "Sealed",
+      "note": "Orb slots -1 at combat start (minimum 1)",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Unstable",
+      "note": "At turn end, 25% chance your oldest orb becomes a different random orb",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Necromantic",
+      "note": "When you Summon, gain 3 Block",
+      "disposition": "port",
+      "effect": "summon_block",
+      "family": "character"
+    },
+    {
+      "name": "Dooming",
+      "note": "When you apply Doom to an enemy, apply 1 more",
+      "disposition": "port",
+      "effect": "doom_extra",
+      "family": "character"
+    },
+    {
+      "name": "Bonebound",
+      "note": "Summon 1 each turn (grows your Osty)",
+      "disposition": "port",
+      "effect": "summon_each_turn",
+      "family": "character"
+    },
+    {
+      "name": "Undying",
+      "note": "Doom no longer kills you outright; once doomed, the next HP you lose kills you instead (death deferred)",
+      "disposition": "port",
+      "effect": "doom_defer",
+      "family": "character"
+    },
+    {
+      "name": "Sacrificial",
+      "note": "When your summon takes damage, apply Weak / Frail / Vulnerable 1 to yourself (once per turn); 2 when it dies",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Doombound",
+      "note": "Each turn, apply 1 Doom to yourself",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Vengeful",
+      "note": "At turn start, Summon 2× the HP you lost since your last turn",
+      "disposition": "port",
+      "effect": "turn_summon_from_hp_lost",
+      "family": "character"
+    },
+    {
+      "name": "Empathic",
+      "note": "At turn start, gain Block equal to the HP your summon lost since your last turn",
+      "disposition": "port",
+      "effect": "turn_block_from_summon_hp",
+      "family": "character"
+    },
+    {
+      "name": "Famished",
+      "note": "End your turn without Summoning and your Osty shrinks by 1 next turn",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Levied",
+      "note": "Cards that cost Stars cost 1 more Star",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Starlit",
+      "note": "Gain 1 Star each turn",
+      "disposition": "port",
+      "effect": "star_each_turn",
+      "family": "character"
+    },
+    {
+      "name": "Reforging",
+      "note": "When you Forge, gain 1 Star",
+      "disposition": "port",
+      "effect": "forge_star",
+      "family": "character"
+    },
+    {
+      "name": "Regal",
+      "note": "When you spend Stars, 50% chance to refund 1 Star",
+      "disposition": "port",
+      "effect": "star_refund_chance",
+      "family": "character"
+    },
+    {
+      "name": "Bankrupt",
+      "note": "Every 4 Stars you spend, a random card in your hand becomes Ethereal",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Tributary",
+      "note": "When you Forge, 50% chance to draw 1 card, 25% chance to draw 2",
+      "disposition": "port",
+      "effect": "forge_draw_chance",
+      "family": "character"
+    },
+    {
+      "name": "Bountiful",
+      "note": "When you gain Stars, 33% chance to gain 1 more",
+      "disposition": "port",
+      "effect": "star_gain_chance",
+      "family": "character"
+    },
+    {
+      "name": "Prodigal",
+      "note": "When you gain Stars, 25% chance to gain 1 less",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    },
+    {
+      "name": "Tarnished",
+      "note": "Lose 1 Star at the end of each turn",
+      "disposition": "drop",
+      "family": "curse",
+      "why": "Pure downside (curse). Curses belonged to reforge/shop; the tree is a voluntary choice of boons."
+    }
+  ],
+  "effects": {
+    "start_thorns": {
+      "scope": "self",
+      "unit": "+1 Thorns per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Thorns"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Thorned",
+        "Barbed"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "BronzeScales"
+      ]
+    },
+    "start_block": {
+      "scope": "self",
+      "unit": "+3 Block per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Block"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Anchored",
+        "Bulwarked"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "Anchor"
+      ]
+    },
+    "start_strength": {
+      "scope": "self",
+      "unit": "+1 Strength per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Strength"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Mighty",
+        "Honed"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "start_dexterity": {
+      "scope": "self",
+      "unit": "+1 Dexterity per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Dexterity"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Supple",
+        "Nimble"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "start_vigor": {
+      "scope": "self",
+      "unit": "+2 Vigor per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Vigor"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Roused gave 3, Ferocious 2; unit takes the lower, tune by node count.",
+      "sources": [
+        "Ferocious",
+        "Roused"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false,
+      "donorRelics": [
+        "Akabeko"
+      ]
+    },
+    "start_artifact": {
+      "scope": "self",
+      "unit": "+1 Artifact per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Artifact"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Warding"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "start_buffer": {
+      "scope": "self",
+      "unit": "+1 Buffer per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Buffer"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Warded"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "start_blur": {
+      "scope": "self",
+      "unit": "+1 Blur per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Blur"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Afterimage"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "start_regen": {
+      "scope": "self",
+      "unit": "+2 Regen per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Regen"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Regenerating"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "start_heal": {
+      "scope": "self",
+      "unit": "+1 HP healed on turn 1 per node",
+      "hook": "AfterPlayerTurnStart (round 1) + heal command",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Vital"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "BloodVial"
+      ]
+    },
+    "start_vulnerable_enemies": {
+      "scope": "sharedEnemy",
+      "unit": "+1 Vulnerable to all enemies per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Vulnerable"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Old Intimidating applied it on turn 2 only to weaken a min-1 effect; with per-node magnitudes the delay is unnecessary.",
+      "sources": [
+        "Intimidating"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "gold_strength": {
+      "scope": "self",
+      "unit": "+1 Strength per 300 gold, per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Strength"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Gilded"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "second_wind_block": {
+      "scope": "self",
+      "unit": "+8 Block, first time HP <= 50% each combat, per node",
+      "hook": "AfterCurrentHpChanged / AfterDamageReceived",
+      "keywords": [
+        "Block"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Renewing"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "enduring_strength": {
+      "scope": "self",
+      "unit": "+1 Strength each turn from turn 5, per node",
+      "hook": "AfterPlayerTurnStart",
+      "keywords": [
+        "Strength"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Enduring"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "first_turn_draw": {
+      "scope": "self",
+      "unit": "+1 card drawn on turn 1, per node",
+      "hook": "ModifyHandDraw (round 1)",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Preemptive"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "low_hp_draw": {
+      "scope": "self",
+      "unit": "+1 card drawn per turn while HP <= 50%, per node",
+      "hook": "ModifyHandDraw",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Cornered"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "turn_vigor": {
+      "scope": "self",
+      "unit": "+1 Vigor each turn per node",
+      "hook": "AfterPlayerTurnStart",
+      "keywords": [
+        "Vigor"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Invigorated"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "turn_ping_damage": {
+      "scope": "enemyThroughMe",
+      "unit": "+1 damage to all enemies each turn per node",
+      "hook": "AfterPlayerTurnStart + damage command",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Quicksilver"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "MercuryHourglass"
+      ]
+    },
+    "energy_every_n_turns": {
+      "scope": "self",
+      "unit": "+1 Energy every 4th turn, per node",
+      "hook": "AfterPlayerTurnStart",
+      "keywords": [
+        "Energy"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Rhythmic"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "HappyFlower"
+      ]
+    },
+    "energy_per_attacks": {
+      "scope": "self",
+      "unit": "+1 Energy per 12 attacks played, per node",
+      "hook": "AfterCardPlayed",
+      "keywords": [
+        "Energy"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Accelerating"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "Nunchaku"
+      ]
+    },
+    "draw_on_first_hit": {
+      "scope": "self",
+      "unit": "+1 card drawn the first time you are hit each combat, per node",
+      "hook": "AfterDamageReceived",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Insightful"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "CentennialPuzzle"
+      ]
+    },
+    "skill_damage_all": {
+      "scope": "enemyThroughMe",
+      "unit": "+1 damage to all enemies per 4 Skills in a turn, per node",
+      "hook": "AfterCardPlayed",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Bladed"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "LetterOpener"
+      ]
+    },
+    "attack_strength": {
+      "scope": "self",
+      "unit": "+1 Strength per 4 Attacks in a turn, per node",
+      "hook": "AfterCardPlayed",
+      "keywords": [
+        "Strength"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Relentless"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "Shuriken"
+      ]
+    },
+    "attack_block": {
+      "scope": "self",
+      "unit": "+1 Block per 4 Attacks in a turn, per node",
+      "hook": "AfterCardPlayed",
+      "keywords": [
+        "Block"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Gusting"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "OrnamentalFan"
+      ]
+    },
+    "attack_dexterity": {
+      "scope": "self",
+      "unit": "+1 Dexterity per 4 Attacks in a turn, per node",
+      "hook": "AfterCardPlayed",
+      "keywords": [
+        "Dexterity"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Darting"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "Kunai"
+      ]
+    },
+    "end_turn_no_block": {
+      "scope": "self",
+      "unit": "+1 Block if you end your turn with none, per node",
+      "hook": "BeforeSideTurnEnd",
+      "keywords": [
+        "Block"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Tempered"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false,
+      "donorRelics": [
+        "Orichalcum"
+      ]
+    },
+    "retain_random": {
+      "scope": "self",
+      "unit": "Retain +1 random card at end of turn, per node",
+      "hook": "BeforeFlush",
+      "keywords": [
+        "Retain"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Retaining"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "power_first_draw": {
+      "scope": "self",
+      "unit": "+2 cards drawn on the first Power played each combat, per node",
+      "hook": "AfterCardPlayed",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Studious"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "power_energy": {
+      "scope": "self",
+      "unit": "+1 Energy when you play a Power (once/turn), per node",
+      "hook": "AfterCardPlayed",
+      "keywords": [
+        "Energy"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Overflowing"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "skill_draw_chance": {
+      "scope": "self",
+      "unit": "+25% chance to draw 1 when you play a Skill, per node",
+      "hook": "AfterCardPlayed",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Cunning"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "exhaust_dodge": {
+      "scope": "self",
+      "unit": "+25% chance an exhausting card is discarded instead, per node",
+      "hook": "Harmony patch on CardCmd.Exhaust (no model hook)",
+      "keywords": [
+        "Exhaust"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Tenacious"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "ethereal_save": {
+      "scope": "self",
+      "unit": "an Ethereal card that would exhaust is discarded instead (on/off)",
+      "hook": "Harmony patch on CardCmd.Exhaust (no model hook)",
+      "keywords": [
+        "Ethereal",
+        "Exhaust"
+      ],
+      "cap": 1.0,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Persistent"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "kill_gold": {
+      "scope": "self",
+      "unit": "+3 gold per enemy killed, per node",
+      "hook": "AfterDeath",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Plundering"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "kill_block": {
+      "scope": "self",
+      "unit": "+3 Block per enemy killed, per node",
+      "hook": "AfterDeath",
+      "keywords": [
+        "Block"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Finishing"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "execute_bonus": {
+      "scope": "enemyThroughMe",
+      "unit": "+25% damage to enemies at <= 20% HP, per node",
+      "hook": "ModifyDamageMultiplicative",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Executing"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "hit_energy_chance": {
+      "scope": "self",
+      "unit": "+25% chance for +1 Energy on unblocked enemy damage, per node",
+      "hook": "AfterDamageReceived",
+      "keywords": [
+        "Energy"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Adrenal"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "spread_debuffs_on_kill": {
+      "scope": "sharedEnemy",
+      "unit": "on killing a Vulnerable enemy, its debuffs spread to another (on/off)",
+      "hook": "AfterDeath",
+      "keywords": [
+        "Vulnerable",
+        "Weak",
+        "Frail",
+        "Poison"
+      ],
+      "cap": 1.0,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Contagious"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "gain_amplify": {
+      "scope": "self",
+      "unit": "gain +1 more when you gain Strength/Dexterity (max 3/turn)",
+      "hook": "AfterPowerAmountChanged",
+      "keywords": [
+        "Strength",
+        "Dexterity"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Its old cost (a bundled enemy-rider curse) no longer exists; whether it needs a new one is a balance call, left to you.",
+      "sources": [
+        "Resonant"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "strength_defense",
+      "new": false
+    },
+    "loss_invert": {
+      "scope": "self",
+      "unit": "enemy Strength/Dexterity reduction becomes a gain (on/off)",
+      "hook": "TryModifyPowerAmountReceived",
+      "keywords": [
+        "Strength",
+        "Dexterity"
+      ],
+      "cap": 1.0,
+      "characters": [],
+      "status": "port",
+      "note": "Decided: strength and defense branch, with gain_amplify (both react to Strength/Dexterity changes).",
+      "sources": [
+        "Obstinate"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "strength_defense",
+      "new": false
+    },
+    "energy_discharge": {
+      "scope": "enemyThroughMe",
+      "unit": "+4 damage to all enemies per bonus Energy gained, per node",
+      "hook": "Harmony patch on PlayerCmd.GainEnergy (AfterModifyingEnergyGain has no arguments)",
+      "keywords": [
+        "Energy"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Decided: Gamble branch, as the payoff for the energy keystones. energy_for_hp and energy_for_max_hp grant bonus Energy every turn, which triggers this each turn; it also works with any other bonus Energy, so it is never dead weight.",
+      "sources": [
+        "Discharging"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "energy_for_hp": {
+      "scope": "self",
+      "unit": "+1 Energy per turn, lose 5 HP at combat start",
+      "hook": "AfterPlayerTurnStart + combat start",
+      "keywords": [
+        "Energy"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Keystone (built-in cost).",
+      "sources": [
+        "Immolating"
+      ],
+      "tier": "keystone",
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "energy_for_max_hp": {
+      "scope": "self",
+      "unit": "+1 Energy per turn, lose 1 Max HP permanently each combat start",
+      "hook": "AfterPlayerTurnStart + combat start",
+      "keywords": [
+        "Energy"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Keystone. The permanent Max HP loss recurs every combat in a run; check the totals before keeping it.",
+      "sources": [
+        "Overclocked"
+      ],
+      "tier": "keystone",
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "replay_grant": {
+      "scope": "self",
+      "unit": "each turn a random hand card gains Replay 1; playing it costs Vulnerable 1 + Frail 1",
+      "hook": "AfterPlayerTurnStart + AfterCardPlayed",
+      "keywords": [
+        "ReplayStatic",
+        "Vulnerable",
+        "Frail"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Keystone (built-in cost).",
+      "sources": [
+        "Echoing"
+      ],
+      "tier": "keystone",
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "enemy_strip": {
+      "scope": "sharedEnemy",
+      "unit": "each turn move one enemy power 1 toward zero",
+      "hook": "AfterPlayerTurnStart",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Keystone (decided). Strips enemy buffs AND teammates' debuffs on enemies; a gamble by design.",
+      "sources": [
+        "Eroding"
+      ],
+      "tier": "keystone",
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "symmetric_vulnerable": {
+      "scope": "sharedEnemy",
+      "unit": "Vulnerable 1 to one enemy and to yourself at combat start, per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Vulnerable"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Decided: owner-only. The old code picked a random player from the whole party; now it is you (identical in solo).",
+      "sources": [
+        "Exposing"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "symmetric_weak": {
+      "scope": "sharedEnemy",
+      "unit": "Weak 1 to one enemy and to yourself at combat start, per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Weak"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Decided: owner-only (see symmetric_vulnerable).",
+      "sources": [
+        "Enervating"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "random_debuff": {
+      "scope": "sharedEnemy",
+      "unit": "each turn 50%: Vulnerable/Weak/Frail 1 to a random enemy or to yourself, per node",
+      "hook": "AfterPlayerTurnStart",
+      "keywords": [
+        "Vulnerable",
+        "Weak",
+        "Frail"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Decided: owner-only. The old code could pick any player in the party.",
+      "sources": [
+        "Chaotic"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "gold_armor": {
+      "scope": "self",
+      "unit": "enemy hits deal 1 less, costing 5 gold each time",
+      "hook": "ModifyDamageAdditive (hits on the owner)",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Keystone (built-in cost).",
+      "sources": [
+        "Bribing"
+      ],
+      "tier": "keystone",
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "proc_double": {
+      "scope": "self",
+      "unit": "other perks' random procs happen twice as often",
+      "hook": "PerkProc.Chance helper (not a game hook)",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Old text says relic prefixes and curses; reword to perks. Needs the PerkProc plumbing. Stacking: multiplier = 1 + total.",
+      "sources": [
+        "Catalytic"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "proc_boost": {
+      "scope": "self",
+      "unit": "+10 points to other perks' random proc chances",
+      "hook": "PerkProc.Chance helper",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Reword relics -> perks. Needs the PerkProc plumbing.",
+      "sources": [
+        "Priming"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "proc_reroll": {
+      "scope": "self",
+      "unit": "other perks' random procs get a second roll",
+      "hook": "PerkProc.Chance helper",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Reword relics -> perks. Needs the PerkProc plumbing.",
+      "sources": [
+        "Empowering"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "gamble",
+      "new": false
+    },
+    "start_power_boost": {
+      "scope": "self",
+      "unit": "+1 to combat-start defensive perks (Artifact/Buffer/Blur)",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Reword relics -> perks; depends on start_artifact/buffer/blur.",
+      "sources": [
+        "Bolstering"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "potion_double": {
+      "scope": "self",
+      "unit": "your potion-use perk effects are doubled",
+      "hook": "PerkProc helper",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Reword; depends on the potion_* effects.",
+      "sources": [
+        "Concentrated"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "potion_boost": {
+      "scope": "self",
+      "unit": "+1 to each potion-use perk amount",
+      "hook": "PerkProc helper",
+      "keywords": [],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Reword; depends on the potion_* effects.",
+      "sources": [
+        "Refined"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "potion_block": {
+      "scope": "self",
+      "unit": "+4 Block on potion use, per node",
+      "hook": "BeforePotionUsed",
+      "keywords": [
+        "Block"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Alchemical"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "potion_strength": {
+      "scope": "self",
+      "unit": "+1 Strength on potion use, per node",
+      "hook": "BeforePotionUsed",
+      "keywords": [
+        "Strength"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Fermented"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "potion_dexterity": {
+      "scope": "self",
+      "unit": "+1 Dexterity on potion use, per node",
+      "hook": "BeforePotionUsed",
+      "keywords": [
+        "Dexterity"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Distilled"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "potion_vulnerable": {
+      "scope": "sharedEnemy",
+      "unit": "+1 Vulnerable to all enemies on potion use, per node",
+      "hook": "BeforePotionUsed",
+      "keywords": [
+        "Vulnerable"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Corrosive"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "potion_weak": {
+      "scope": "sharedEnemy",
+      "unit": "+1 Weak to all enemies on potion use, per node",
+      "hook": "BeforePotionUsed",
+      "keywords": [
+        "Weak"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Diluting"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "potion_buffer": {
+      "scope": "self",
+      "unit": "+25% chance of 1 Buffer on potion use, per node",
+      "hook": "BeforePotionUsed",
+      "keywords": [
+        "Buffer"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Effervescent"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "curse_draw_stat": {
+      "scope": "self",
+      "unit": "drawing a Curse card gives +1 Strength or Dexterity (once/turn), per node",
+      "hook": "AfterCardDrawn",
+      "keywords": [
+        "Strength",
+        "Dexterity"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Cursefed"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "block_per_relic": {
+      "scope": "self",
+      "unit": "+2 Block per relic carried at combat start (max 8), per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Block"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Old Attuned counted OTHER FORGED relics; now counts relics carried.",
+      "sources": [
+        "Attuned"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "curse_count_ramp": {
+      "scope": "self",
+      "unit": "combat-start ramp by number of Curse cards in your deck (1: +1 Str; 2: +1 Str +1 Dex; 3: +2/+2; 4: +3/+2; 5+: +3/+3 and Intangible 1), once per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply; count Player.Deck cards with Type == Curse",
+      "keywords": [
+        "Strength",
+        "Dexterity",
+        "Intangible"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Decided: count Curse cards in the deck (the old code counted Relic Forge curses on relics). Combat-created curses do not count; the deck is the run deck.",
+      "sources": [
+        "Cursebound"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "vulnerable_resist": {
+      "scope": "self",
+      "unit": "Vulnerable is 0.10 (10 points) less effective on you, per node: +50% damage taken becomes +40%",
+      "hook": "Harmony postfix on VulnerablePower.ModifyDamageMultiplicative (game hardcodes its modifiers; no model hook)",
+      "keywords": [
+        "Vulnerable"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Applied last, to the game's final multiplier, so Debilitate etc. still count (a stacked-resistance player is not flatly immune to them). Floors at neutral. Natural cap = the vanilla size; the UI must read it from the power. Place past the cost nodes so the player pays first.",
+      "sources": [],
+      "tier": null,
+      "placement": null,
+      "branch": "gamble",
+      "new": true
+    },
+    "weak_resist": {
+      "scope": "self",
+      "unit": "Weak is 0.10 (10 points) less effective on you, per node: -25% damage dealt becomes -15%",
+      "hook": "Harmony postfix on WeakPower.ModifyDamageMultiplicative (game hardcodes its modifiers; no model hook)",
+      "keywords": [
+        "Weak"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Same rules as vulnerable_resist. Base value 0.75 (read from the game's IL). Weak is a smaller effect than Vulnerable (1.5), so the same 10 points is a larger share of it; per-node size is yours to tune.",
+      "sources": [],
+      "tier": null,
+      "placement": null,
+      "branch": "gamble",
+      "new": true
+    },
+    "frail_resist": {
+      "scope": "self",
+      "unit": "Frail is 0.10 (10 points) less effective on you, per node: -25% block gained becomes -15%",
+      "hook": "Harmony postfix on FrailPower.ModifyBlockMultiplicative (game hardcodes its modifiers; no model hook)",
+      "keywords": [
+        "Frail"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Same rules as vulnerable_resist. Base value 0.75 (read from the game's IL).",
+      "sources": [],
+      "tier": null,
+      "placement": null,
+      "branch": "gamble",
+      "new": true
+    },
+    "vigor_strength_pct": {
+      "scope": "self",
+      "unit": "each Vigor consumed: +15% chance of 1 Strength, per node",
+      "hook": "AfterPowerAmountChanged (power is VigorPower, amount < 0)",
+      "keywords": [
+        "Vigor",
+        "Strength"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Does not fire on the turn-end conversion (Congealing/Evolving), as in the old mod.",
+      "sources": [
+        "Quenched"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "vigor_block_pct": {
+      "scope": "self",
+      "unit": "each Vigor consumed: +25% chance of 2 Block, per node",
+      "hook": "AfterPowerAmountChanged (power is VigorPower, amount < 0)",
+      "keywords": [
+        "Vigor",
+        "Block"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Does not fire on the turn-end conversion (Congealing/Evolving), as in the old mod.",
+      "sources": [
+        "Bracing"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "vigor_vulnerable_pct": {
+      "scope": "sharedEnemy",
+      "unit": "each Vigor consumed: +20% chance of Vulnerable 1 to a random enemy, per node",
+      "hook": "AfterPowerAmountChanged (power is VigorPower, amount < 0)",
+      "keywords": [
+        "Vigor",
+        "Vulnerable"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Does not fire on the turn-end conversion (Congealing/Evolving), as in the old mod.",
+      "sources": [
+        "Rending"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "vigor_weak_pct": {
+      "scope": "sharedEnemy",
+      "unit": "each Vigor consumed: +20% chance of Weak 1 to a random enemy, per node",
+      "hook": "AfterPowerAmountChanged (power is VigorPower, amount < 0)",
+      "keywords": [
+        "Vigor",
+        "Weak"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Does not fire on the turn-end conversion (Congealing/Evolving), as in the old mod.",
+      "sources": [
+        "Withering"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "vigor_energy_pct": {
+      "scope": "self",
+      "unit": "each Vigor consumed: +10% chance of 1 Energy, per node",
+      "hook": "AfterPowerAmountChanged (power is VigorPower, amount < 0)",
+      "keywords": [
+        "Vigor",
+        "Energy"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Does not fire on the turn-end conversion (Congealing/Evolving), as in the old mod.",
+      "sources": [
+        "Stoking"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "vigor_regen_pct": {
+      "scope": "self",
+      "unit": "each Vigor consumed: +20% chance of 1 Regen, per node",
+      "hook": "AfterPowerAmountChanged (power is VigorPower, amount < 0)",
+      "keywords": [
+        "Vigor",
+        "Regen"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Does not fire on the turn-end conversion (Congealing/Evolving), as in the old mod.",
+      "sources": [
+        "Wellspring"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "vigor_gain_amplify": {
+      "scope": "self",
+      "unit": "gaining Vigor gives +1 more (max 3 times/turn) (on/off)",
+      "hook": "AfterPowerAmountChanged",
+      "keywords": [
+        "Vigor"
+      ],
+      "cap": 1.0,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Surging"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "vigor_unused_to_block": {
+      "scope": "self",
+      "unit": "end of turn: unused Vigor converts to Block 1:1 (on/off)",
+      "hook": "BeforeSideTurnEnd",
+      "keywords": [
+        "Vigor",
+        "Block"
+      ],
+      "cap": 1.0,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Congealing"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "vigor_unused_strength_pct": {
+      "scope": "self",
+      "unit": "end of turn: consume unused Vigor, +18% chance of 1 Strength each, per node",
+      "hook": "BeforeSideTurnEnd",
+      "keywords": [
+        "Vigor",
+        "Strength"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Evolving"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "vigor_proc_double": {
+      "scope": "self",
+      "unit": "other Vigor-consume perks proc twice as often; 5% self-debuff and 1% stat loss on consume",
+      "hook": "AfterPowerAmountChanged (power is VigorPower, amount < 0)",
+      "keywords": [
+        "Vigor"
+      ],
+      "cap": null,
+      "characters": [],
+      "status": "port",
+      "note": "Keystone (built-in cost: 5% self-debuff and 1% stat loss per consume). Reword relics -> perks. Not fired by the turn-end conversion, as in the old mod.",
+      "sources": [
+        "Frenzied"
+      ],
+      "tier": "keystone",
+      "placement": null,
+      "branch": "vigor",
+      "new": false
+    },
+    "exhaust_block": {
+      "scope": "self",
+      "unit": "+2 Block whenever a card is exhausted, per node",
+      "hook": "AfterCardExhausted",
+      "keywords": [
+        "Exhaust",
+        "Block"
+      ],
+      "cap": null,
+      "characters": [
+        "IRONCLAD"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Cindered"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "first_hp_loss_strength": {
+      "scope": "self",
+      "unit": "+2 Strength the first time you lose HP each combat, per node",
+      "hook": "AfterDamageReceived",
+      "keywords": [
+        "Strength"
+      ],
+      "cap": null,
+      "characters": [
+        "IRONCLAD"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Bloodforged"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "vulnerable_extra_chance": {
+      "scope": "sharedEnemy",
+      "unit": "+25% chance to apply 1 more Vulnerable, per node",
+      "hook": "AfterPowerAmountChanged",
+      "keywords": [
+        "Vulnerable"
+      ],
+      "cap": null,
+      "characters": [
+        "IRONCLAD"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Gouging"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "hp_lost_vigor": {
+      "scope": "self",
+      "unit": "turn start: gain Vigor equal to half the HP lost since last turn, per node",
+      "hook": "AfterPlayerTurnStart",
+      "keywords": [
+        "Vigor"
+      ],
+      "cap": null,
+      "characters": [
+        "IRONCLAD"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Retaliating"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "poison_extra_chance": {
+      "scope": "sharedEnemy",
+      "unit": "+50% chance to apply 1 more Poison, per node",
+      "hook": "AfterPowerAmountChanged",
+      "keywords": [
+        "Poison"
+      ],
+      "cap": null,
+      "characters": [
+        "SILENT"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Envenomed"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "shiv_duplicate_chance": {
+      "scope": "self",
+      "unit": "+25% chance a played Shiv adds a Shiv to hand, per node",
+      "hook": "AfterCardPlayed",
+      "keywords": [],
+      "cap": null,
+      "characters": [
+        "SILENT"
+      ],
+      "status": "port",
+      "note": "Keyword gap: Shiv is a card, needs a card tooltip.",
+      "sources": [
+        "Flurrying"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "discard_draw": {
+      "scope": "self",
+      "unit": "draw a card whenever you discard one, per node",
+      "hook": "AfterCardDiscarded",
+      "keywords": [],
+      "cap": null,
+      "characters": [
+        "SILENT"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Cycling"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "shiv_return_chance": {
+      "scope": "self",
+      "unit": "+25% chance an exhausted Shiv returns to hand, per node",
+      "hook": "AfterCardExhausted",
+      "keywords": [
+        "Exhaust"
+      ],
+      "cap": null,
+      "characters": [
+        "SILENT"
+      ],
+      "status": "port",
+      "note": "Keyword gap: Shiv.",
+      "sources": [
+        "Retrieving"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "first_focus_bonus": {
+      "scope": "self",
+      "unit": "the first time you gain Focus each combat, gain 1 more, per node",
+      "hook": "AfterPowerAmountChanged",
+      "keywords": [
+        "Focus"
+      ],
+      "cap": null,
+      "characters": [
+        "DEFECT"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Focused"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "orb_channel_chance": {
+      "scope": "self",
+      "unit": "+25% chance a Channeled orb Channels a random orb too, per node",
+      "hook": "AfterOrbChanneled",
+      "keywords": [
+        "Channeling"
+      ],
+      "cap": null,
+      "characters": [
+        "DEFECT"
+      ],
+      "status": "port",
+      "note": "Keyword gap: Orb needs an orb tooltip.",
+      "sources": [
+        "Amplified"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "focus_when_full": {
+      "scope": "self",
+      "unit": "+1 Focus while orb slots are full, per node",
+      "hook": "AfterOrbChanneled / evoke + slot count",
+      "keywords": [
+        "Focus"
+      ],
+      "cap": null,
+      "characters": [
+        "DEFECT"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Supercharged"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "start_channel_orb": {
+      "scope": "self",
+      "unit": "Channel a random orb at combat start, per node",
+      "hook": "AfterRoomEntered (room is CombatRoom) + PowerCmd.Apply",
+      "keywords": [
+        "Channeling"
+      ],
+      "cap": null,
+      "characters": [
+        "DEFECT"
+      ],
+      "status": "port",
+      "note": "Keyword gap: Orb.",
+      "sources": [
+        "Preheated"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "summon_block": {
+      "scope": "self",
+      "unit": "+3 Block when you Summon, per node",
+      "hook": "AfterSummon",
+      "keywords": [
+        "Block",
+        "SummonStatic"
+      ],
+      "cap": null,
+      "characters": [
+        "NECROBINDER"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Necromantic"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "doom_extra": {
+      "scope": "sharedEnemy",
+      "unit": "when you apply Doom, apply 1 more, per node",
+      "hook": "AfterPowerAmountChanged",
+      "keywords": [
+        "Doom"
+      ],
+      "cap": null,
+      "characters": [
+        "NECROBINDER"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Dooming"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "summon_each_turn": {
+      "scope": "self",
+      "unit": "Summon 1 each turn, per node",
+      "hook": "AfterPlayerTurnStart",
+      "keywords": [
+        "SummonStatic"
+      ],
+      "cap": null,
+      "characters": [
+        "NECROBINDER"
+      ],
+      "status": "port",
+      "note": "Keyword gap: Osty.",
+      "sources": [
+        "Bonebound"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "doom_defer": {
+      "scope": "self",
+      "unit": "Doom no longer kills you outright; the next HP you lose kills you instead (on/off)",
+      "hook": "Harmony patch on DoomPower.DoomKill",
+      "keywords": [
+        "Doom"
+      ],
+      "cap": 1.0,
+      "characters": [
+        "NECROBINDER"
+      ],
+      "status": "port",
+      "note": "Rewrites a core death rule. Keystone, placed about 30 points in. Needs a Harmony patch on DoomPower.DoomKill (an event-driven call, not per-frame).",
+      "sources": [
+        "Undying"
+      ],
+      "tier": "keystone",
+      "placement": "about 30 allocated points from a start node (your call)",
+      "branch": null,
+      "new": false
+    },
+    "turn_summon_from_hp_lost": {
+      "scope": "self",
+      "unit": "turn start: Summon 2x the HP lost since last turn, per node",
+      "hook": "AfterPlayerTurnStart",
+      "keywords": [
+        "SummonStatic"
+      ],
+      "cap": null,
+      "characters": [
+        "NECROBINDER"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Vengeful"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "turn_block_from_summon_hp": {
+      "scope": "self",
+      "unit": "turn start: Block equal to the HP your summon lost, per node",
+      "hook": "AfterPlayerTurnStart",
+      "keywords": [
+        "Block"
+      ],
+      "cap": null,
+      "characters": [
+        "NECROBINDER"
+      ],
+      "status": "port",
+      "note": "",
+      "sources": [
+        "Empathic"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "star_each_turn": {
+      "scope": "self",
+      "unit": "+1 Star each turn, per node",
+      "hook": "AfterPlayerTurnStart",
+      "keywords": [],
+      "cap": null,
+      "characters": [
+        "REGENT"
+      ],
+      "status": "port",
+      "note": "Keyword gap: Stars.",
+      "sources": [
+        "Starlit"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "forge_star": {
+      "scope": "self",
+      "unit": "+1 Star when you Forge, per node",
+      "hook": "AfterForge",
+      "keywords": [
+        "Forge"
+      ],
+      "cap": null,
+      "characters": [
+        "REGENT"
+      ],
+      "status": "port",
+      "note": "Keyword gap: Stars.",
+      "sources": [
+        "Reforging"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "star_refund_chance": {
+      "scope": "self",
+      "unit": "+50% chance to refund 1 Star when you spend Stars, per node",
+      "hook": "AfterStarsSpent",
+      "keywords": [],
+      "cap": null,
+      "characters": [
+        "REGENT"
+      ],
+      "status": "port",
+      "note": "Keyword gap: Stars.",
+      "sources": [
+        "Regal"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "forge_draw_chance": {
+      "scope": "self",
+      "unit": "when you Forge: +50% chance to draw 1 card, per node",
+      "hook": "AfterForge",
+      "keywords": [
+        "Forge"
+      ],
+      "cap": null,
+      "characters": [
+        "REGENT"
+      ],
+      "status": "port",
+      "note": "Decided: the old second chance (+25% to draw 2) is dropped. Several nodes of this one effect stack to get the same result if wanted later.",
+      "sources": [
+        "Tributary"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    },
+    "star_gain_chance": {
+      "scope": "self",
+      "unit": "+33% chance to gain 1 more Star when you gain Stars, per node",
+      "hook": "AfterStarsGained",
+      "keywords": [],
+      "cap": null,
+      "characters": [
+        "REGENT"
+      ],
+      "status": "port",
+      "note": "Keyword gap: Stars.",
+      "sources": [
+        "Bountiful"
+      ],
+      "tier": null,
+      "placement": null,
+      "branch": null,
+      "new": false
+    }
+  }
+}

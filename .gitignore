@@ -1,0 +1,10 @@
+# Build output and local tooling
+bin/
+obj/
+.vs/
+.idea/
+*.user
+TestResults/
+
+# The game's own DLLs (mod/lib) must never be committed: copy them there to build, see mod/README.md
+lib/

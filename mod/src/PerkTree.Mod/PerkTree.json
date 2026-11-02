@@ -1,0 +1,11 @@
+{
+  "id": "PerkTree",
+  "name": "Perk Tree",
+  "author": "",
+  "description": "Spend perk points earned in combat on a per-character perk tree. Replaces imbuing relics with run-long perks.",
+  "version": "0.1.0",
+  "has_pck": false,
+  "has_dll": true,
+  "dependencies": [],
+  "affects_gameplay": true
+}

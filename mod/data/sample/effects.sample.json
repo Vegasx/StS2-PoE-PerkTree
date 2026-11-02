@@ -1,0 +1,26 @@
+// SAMPLE DATA ONLY: placeholder ids and numbers that show the file format.
+// The real catalog comes out of the prefix audit (design doc build step 1).
+{
+  "schemaVersion": 2,
+  "effects": [
+    // Character-limited: only trees for "silent" may use it, so no node is ever dead weight.
+    { "id": "sample.poison_bonus", "scope": "self", "keywords": ["Poison"], "characters": ["silent"] },
+
+    // Capped at 100% because a chance can't go past certain.
+    { "id": "sample.discard_chance", "scope": "self", "cap": 1.0 },
+
+    { "id": "start_thorns", "scope": "self", "keywords": ["Thorns"] },
+
+    // SharedEnemy: changes the enemy for ALL players, so tooltips must label it.
+    { "id": "sample.enemy_vulnerable_bonus", "scope": "sharedEnemy", "cap": 1.0, "keywords": ["Vulnerable"] },
+
+    { "id": "sample.damage_vs_weak", "scope": "enemyThroughMe", "keywords": ["Weak"] },
+
+    // Resistance (Gamble branch). Unlike the sample.* ids above these use their REAL ids, because the mod implements
+    // them for real (see ResistPatches.cs). Magnitude is in multiplier units: 0.10 = "10 points less effective".
+    // No cap: the natural limit (the debuff reaching neutral) is enforced at runtime.
+    { "id": "vulnerable_resist", "scope": "self", "keywords": ["Vulnerable"] },
+    { "id": "weak_resist",       "scope": "self", "keywords": ["Weak"] },
+    { "id": "frail_resist",      "scope": "self", "keywords": ["Frail"] }
+  ]
+}

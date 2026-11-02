@@ -1,0 +1,33 @@
+{
+"version":1,
+"_help":"Stand-in keyword text for companion tooltips, keyed by the game's own keyword id (the ids the mod's effect catalog uses). match is a regular expression tested against a perk's text when the perk has no explicit keywords. gap true means the game tooltip source is not found yet. inline true means the game shows it as an icon, so no companion tooltip.",
+"keywords":{
+"Thorns":{"text":"Deals damage back to attackers.","match":"Thorns"},
+"Vulnerable":{"text":"Takes 50% more damage from Attacks.","match":"Vulnerable"},
+"Weak":{"text":"Deals 25% less damage with Attacks.","match":"\\bWeak\\b"},
+"Frail":{"text":"Gains 25% less Block from cards.","match":"Frail"},
+"Poison":{"text":"Loses HP each turn, then the amount drops.","match":"Poison"},
+"Doom":{"text":"Dies if its HP is at or below its Doom total.","match":"Doom"},
+"Strength":{"text":"Adds damage to Attacks.","match":"Strength|\\bStr\\b"},
+"Dexterity":{"text":"Adds Block to cards.","match":"Dexterity|\\bDex\\b"},
+"Vigor":{"text":"Your next Attack deals extra damage.","match":"Vigor"},
+"Artifact":{"text":"Negates the next debuff.","match":"Artifact"},
+"Buffer":{"text":"Prevents the next HP loss.","match":"Buffer"},
+"Blur":{"text":"Block is not removed next turn.","match":"Blur"},
+"Regen":{"text":"Heals HP at end of turn.","match":"Regen"},
+"Focus":{"text":"Strengthens Orbs.","match":"Focus"},
+"Exhaust":{"text":"Removed from play until the combat ends.","match":"Exhaust"},
+"Ethereal":{"text":"Exhausts if still in hand at end of turn.","match":"Ethereal"},
+"Intangible":{"text":"All damage taken becomes 1.","match":"Intangible"},
+"Forge":{"text":"Regent mechanic.","match":"Forge"},
+"Orb":{"text":"Passive effect each turn. Evoke for a burst.","match":"Orb","gap":true},
+"Shiv":{"text":"A 0-cost Attack card.","match":"Shiv","gap":true},
+"Stars":{"text":"Regent resource spent on cards.","match":"\\bStars?\\b","gap":true},
+"ReplayStatic":{"text":"The card is played an extra time.","match":"Replay"},
+"SummonStatic":{"text":"Adds to your summon (Osty).","match":"Summon"},
+"Block":{"text":"Absorbs damage this turn.","match":"\\bBlock\\b","inline":true},
+"Energy":{"text":"Spent to play cards.","match":"\\bEnergy\\b","inline":true},
+"Retain":{"text":"Not discarded at the end of your turn.","match":"Retain","inline":true},
+"Channeling":{"text":"Orbs enter your slots when Channeled.","match":"Channel"}
+}
+}

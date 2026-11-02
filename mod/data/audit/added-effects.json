@@ -1,0 +1,15 @@
+[
+{"id": "turn_heal", "name": "Healing", "note": "Added 2026-11-01 after the audit: restore HP at the start of your turn."},
+{"id": "focus_gain_chance", "name": "Focal", "note": "Added 2026-11-01 after the audit: when you gain Focus, a chance to gain more."},
+{"id": "play_copy_chance", "name": "Supply", "note": "Added 2026-11-01 after the audit: when you play a card, a chance to add an Ethereal, Exhausting copy to your hand."},
+{"id": "combat_gold_reward", "name": "Cash Flow", "note": "Added 2026-11-01 after the audit: a separate Gold reward on the rewards screen after combat."},
+{"id": "potion_slot", "name": "Potion+", "note": "Added 2026-11-01 after the audit: +1 permanent potion slot, applied on room entry."},
+{"id": "potion_find_chance", "name": "Potionholic", "note": "Added 2026-11-01 after the audit: a chance of extra potion rewards after combat."},
+{"id": "potion_acid", "name": "Acidic", "note": "Added 2026-11-01 after the audit: damage to all enemies when you use a potion."},
+{"id": "potion_refund_chance", "name": "Recycler", "note": "Added 2026-11-01 after the audit: a chance to get a used potion back."},
+{"id": "max_hp", "name": "Healthy", "note": "Added 2026-11-01 after the audit: +Max HP, applied on room entry once the perk is committed."},
+{"id": "potion_poison", "name": "Hidden Dose", "note": "Added 2026-11-01 after the audit: using a potion applies Poison to all enemies."},
+{"id": "poison_apply_block", "name": "Toxic Ward", "note": "Added 2026-11-01 after the audit: applying Poison has a chance to give Block."},
+{"id": "poison_apply_damage", "name": "Poison Cloud", "note": "Added 2026-11-01 after the audit: applying Poison has a chance to deal damage to that enemy."},
+{"id": "damaged_block_chance", "name": "Swift Defense", "note": "Added 2026-11-01 after the audit: when you take damage, a chance to gain Block."}
+]

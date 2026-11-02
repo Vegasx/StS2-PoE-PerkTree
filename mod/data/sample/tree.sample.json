@@ -1,0 +1,47 @@
+// SAMPLE DATA ONLY: a tiny tree that shows the file format.
+//
+//   poison_1* - poison_2 - poison_3
+//                  \
+//                  gen_1 - gen_2 - gen_3 - gen_4 - gen_5 - gen_6
+//                  /
+//   util_1*  - util_2 - util_3        (* = start node; gen_4..6 are the Vulnerable/Weak/Frail resistance nodes)
+{
+  "schemaVersion": 2,
+  "characterId": "silent",
+  "starts": ["poison_1", "util_1"],
+  "branches": [
+    { "id": "poison", "name": "Venom", "kind": "character" },
+    { "id": "util", "name": "Sleight", "kind": "character" },
+    { "id": "general", "name": "Resilience", "kind": "general" }
+  ],
+  "nodes": [
+    { "id": "poison_1", "branch": "poison", "tier": "small",   "effectId": "sample.poison_bonus", "magnitude": 0.25, "x": 0,   "y": 0 },
+    { "id": "poison_2", "branch": "poison", "tier": "small",   "effectId": "sample.poison_bonus", "magnitude": 0.25, "x": 100, "y": 0 },
+    { "id": "poison_3", "branch": "poison", "tier": "notable", "effectId": "sample.poison_bonus", "magnitude": 0.50, "x": 200, "y": 0 },
+
+    { "id": "util_1", "branch": "util", "tier": "small",   "effectId": "sample.discard_chance", "magnitude": 0.25, "x": 0,   "y": 200 },
+    { "id": "util_2", "branch": "util", "tier": "small",   "effectId": "sample.discard_chance", "magnitude": 0.25, "x": 100, "y": 200 },
+    { "id": "util_3", "branch": "util", "tier": "notable", "effectId": "sample.discard_chance", "magnitude": 0.25, "x": 200, "y": 200 },
+
+    { "id": "gen_1", "branch": "general", "tier": "small",    "effectId": "start_thorns",        "magnitude": 1,    "x": 100, "y": 100 },
+    { "id": "gen_2", "branch": "general", "tier": "small",    "effectId": "sample.enemy_vulnerable_bonus", "magnitude": 0.25, "x": 200, "y": 100 },
+    { "id": "gen_3", "branch": "general", "tier": "keystone", "effectId": "sample.damage_vs_weak",         "magnitude": 0.50, "x": 300, "y": 100 },
+
+    { "id": "gen_4", "branch": "general", "tier": "small", "effectId": "vulnerable_resist", "magnitude": 0.10, "x": 400, "y": 100 },
+    { "id": "gen_5", "branch": "general", "tier": "small", "effectId": "weak_resist",       "magnitude": 0.10, "x": 500, "y": 100 },
+    { "id": "gen_6", "branch": "general", "tier": "small", "effectId": "frail_resist",      "magnitude": 0.10, "x": 600, "y": 100 }
+  ],
+  "edges": [
+    ["poison_1", "poison_2"],
+    ["poison_2", "poison_3"],
+    ["util_1", "util_2"],
+    ["util_2", "util_3"],
+    ["poison_2", "gen_1"],
+    ["util_2", "gen_1"],
+    ["gen_1", "gen_2"],
+    ["gen_2", "gen_3"],
+    ["gen_3", "gen_4"],
+    ["gen_4", "gen_5"],
+    ["gen_5", "gen_6"]
+  ]
+}

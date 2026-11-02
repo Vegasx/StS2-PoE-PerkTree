@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- sts2.dll references the .NET 9 runtime, so the mod must target net9.0 or higher. -->
+    <TargetFramework>net9.0</TargetFramework>
+    <!-- Escape hatch for machines without the net9.0 targeting pack (e.g. a CI box): -p:ModTfm=net10.0 still compiles
+         for API verification, but ship the net9.0 build. -->
+    <TargetFramework Condition="'$(ModTfm)' != ''">$(ModTfm)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <!-- The game finds the mod by folder + manifest id, and loads <id>.dll, so the assembly must be named PerkTree. -->
+    <AssemblyName>PerkTree</AssemblyName>
+    <RootNamespace>PerkTree.Mod</RootNamespace>
+
+    <!-- Game assemblies pull in many types we never touch; missing-reference noise would hide real warnings. -->
+    <NoWarn>$(NoWarn);CS8618</NoWarn>
+
+    <!-- Where the game's own DLLs are. Defaults to the repo's gitignored lib/ folder; point it at the game's
+         data_sts2_windows_x86_64 folder to build against the installed game directly:
+           dotnet build -p:Sts2LibDir="C:\SteamLibrary\steamapps\common\Slay the Spire 2\data_sts2_windows_x86_64" -->
+    <Sts2LibDir Condition="'$(Sts2LibDir)' == ''">$(MSBuildThisFileDirectory)..\..\lib</Sts2LibDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false: never copy the game's own DLLs into our output; the game already has them loaded. -->
+    <Reference Include="sts2"><HintPath>$(Sts2LibDir)\sts2.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="GodotSharp"><HintPath>$(Sts2LibDir)\GodotSharp.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(Sts2LibDir)\0Harmony.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Core is compiled INTO PerkTree.dll instead of referenced as a second assembly. Loading a sibling DLL from a
+         mod folder goes through the game's assembly-resolve fallback, which is one more thing to break after a patch. -->
+    <Compile Include="..\PerkTree.Core\**\*.cs" Exclude="..\PerkTree.Core\obj\**;..\PerkTree.Core\bin\**" LinkBase="Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Manifest sits next to the dll, named after the mod id. -->
+    <None Include="PerkTree.json" CopyToOutputDirectory="PreserveNewest" />
+
+    <!-- The data the editor exports (node tools/export-mod.mjs from the repo root). PerkData loads effects.json and <character>.tree.json
+         from the data/ folder next to the dll. The old hand-written samples stay in data/sample for the unit tests only. -->
+    <None Include="..\..\data\runtime\*.json" LinkBase="data" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

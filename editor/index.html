@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StS2 Perk Tree Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Kreon:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout idea: top bar for run state, a pan/zoom wheel of branches around the start node(s), a dev drawer on the right. */
+  --bg:#0d0f15; --panel:#151923; --panel2:#1b2030; --line:#2b3245; --ink:#ebe8de; --mute:#98a0b4; --accent:#e3b341;
+  --disp:'Kreon',Georgia,serif; --body:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.4 var(--body);display:flex;flex-direction:column;overflow:hidden}
+button,input{font:inherit;color:inherit}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--accent);color:#1a1405;border-color:var(--accent);font-weight:700}
+button:focus-visible,input:focus-visible,.node:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand h1{font:600 20px var(--disp);margin:0;letter-spacing:.02em}
+.brand .sub{color:var(--mute);font-size:12px}
+#chars{display:flex;gap:4px}
+#chars button{display:flex;align-items:center;gap:6px;padding:5px 10px}
+#chars button[aria-selected="true"]{border-color:var(--accent);background:#262b3d}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+#pts{display:flex;gap:14px;font-variant-numeric:tabular-nums}
+#pts .k{color:var(--mute);font-size:12px;display:block}
+#pts b{font-size:18px;font-family:var(--disp)}
+#pts .big b{color:var(--accent);font-size:22px}
+.grp{display:flex;gap:6px;align-items:center}
+.grp .lab{color:var(--mute);font-size:12px;margin-right:2px}
+#stage{position:relative;flex:1;min-height:0}
+#svg{width:100%;height:100%;display:block;cursor:grab;touch-action:none;background:#161616}
+#svg.panning{cursor:grabbing}
+.edge{stroke:#6a6e7c;stroke-width:1.8;fill:none;stroke-linecap:round}
+.edge.half{stroke:var(--ec);stroke-opacity:.6;stroke-width:2.6}
+.edge.on{stroke:var(--ec);stroke-opacity:1;stroke-width:4}
+.edge.modhl{stroke:#3b82f6;stroke-opacity:1;stroke-width:3.5}
+.socket rect{fill:#161616;stroke:#c9ccd6;stroke-width:2}
+.socket.lit rect{fill:#e3b341;stroke:#e3b341}
+.node{cursor:pointer;outline:none}
+.node .shape{fill:#161616;stroke:var(--c);stroke-opacity:.6;stroke-width:2}
+.node .inner{fill:none;stroke:var(--c);stroke-opacity:.6;stroke-width:2}
+.node .glyph{fill:var(--c);font-family:'DejaVu Sans',system-ui,sans-serif;text-anchor:middle;dominant-baseline:central;pointer-events:none;opacity:.8}
+.node.notable .glyph{font-size:0}
+.node.avail .shape,.node.avail .inner{stroke-opacity:1;stroke-width:3}
+.node.pend .shape{fill:var(--c);fill-opacity:.35;stroke:#fff;stroke-opacity:1;stroke-dasharray:4 3;stroke-width:2.5}
+.node.pend .inner{stroke:#fff;stroke-opacity:1}
+.node.alloc .shape{fill:var(--c);fill-opacity:1;stroke:#fff;stroke-opacity:.9;stroke-width:2}
+.node.alloc .inner{stroke:#161616;stroke-opacity:.9}
+.node.alloc .glyph,.node.pend .glyph{opacity:1}
+.node.alloc .glyph{fill:#10131b}
+.node.pend .glyph{fill:#fff}
+.node .halo{fill:none;stroke-width:3;opacity:0;pointer-events:none}
+.node.syn .halo{stroke:#6ff2c8;opacity:1}
+.node.anti .halo{stroke:#ff5d5d;stroke-dasharray:3 4;opacity:1}
+.node.me .halo{stroke:#fff;opacity:1}
+.dim{opacity:.18}
+.node.match .halo{stroke:#ffe27a;opacity:1;stroke-width:4}
+.badge{pointer-events:none}
+.capt{fill:#d6d8e0;font:26px var(--body);text-anchor:middle;pointer-events:none;display:none}.capt.show{display:block}
+.lbl{fill:var(--mute);font:600 22px var(--disp);text-anchor:middle;letter-spacing:.06em;text-transform:uppercase;pointer-events:none;display:none}
+.showlbl .lbl{display:block}
+#tipwrap{position:absolute;display:none;z-index:5;pointer-events:none;flex-direction:column;gap:6px;max-width:330px}
+.tip{background:#10131c;border:1px solid #3a4260;border-radius:8px;padding:10px 12px;box-shadow:0 8px 24px #0009}
+.tip h3{margin:0 0 4px;font:600 17px var(--disp)}
+.tip .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.chip{font-size:11px;border:1px solid var(--line);border-radius:10px;padding:1px 8px;color:var(--mute)}
+.chip.x{border-color:#d9534f;color:#ff8d8a}.chip.e{border-color:#e8863a;color:#f4b27a}.chip.k{border-color:var(--accent);color:var(--accent)}
+.tip p{margin:4px 0}
+.tip .txt{font-size:15px}
+.tip .tot{color:var(--accent);font-variant-numeric:tabular-nums}
+.tip .sm{font-size:12px;color:var(--mute)}
+.tip .syn{font-size:12px;color:#6ff2c8}.tip .anti{font-size:12px;color:#ff8d8a}
+.tip .warn{font-size:12px;color:#ffcf6b}
+.tip.kw{padding:8px 10px;background:#0c0f17}
+.tip.kw h4{margin:0;font:600 14px var(--disp)}
+.tip.kw .sm{margin:2px 0 0}
+.tip.kw.gap{border-style:dashed}
+#legend{position:absolute;left:12px;bottom:12px;background:#10131ccc;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--mute);display:grid;gap:4px;max-width:260px}
+#legend .r{display:flex;gap:8px;align-items:center}
+#legend svg{flex:none}
+#zoom{position:absolute;left:12px;top:12px;display:flex;gap:6px;align-items:center}
+#zoom input{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:170px}
+#toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--accent);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9;max-width:80%}
+#toast.show{opacity:1}
+#drawer{position:absolute;right:0;top:0;bottom:0;width:340px;max-width:92%;background:var(--panel);border-left:1px solid var(--line);padding:14px;overflow:auto;transform:translateX(100%);transition:transform .2s;z-index:6}
+#drawer.open{transform:none}
+#drawer h2{font:600 16px var(--disp);margin:14px 0 6px}
+#drawer h2:first-child{margin-top:0}
+#drawer label{display:flex;gap:8px;align-items:center;margin:6px 0}
+#drawer table{width:100%;border-collapse:collapse;font-size:12px}
+#drawer td,#drawer th{padding:3px 4px;border-bottom:1px solid var(--line);text-align:left}
+#drawer .ok{color:#6ff2c8}#drawer .bad{color:#ff8d8a}#drawer .meh{color:#ffcf6b}
+#drawer ul{margin:4px 0;padding-left:18px;font-size:12px;color:var(--mute)}
+#sheet{position:absolute;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:8;padding:16px}
+#sheet.open{display:flex}
+#sheet .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;max-width:760px;width:100%;max-height:100%;overflow:auto;padding:16px}
+#sheet h2{font:600 20px var(--disp);margin:0 0 2px}
+#sheet table{width:100%;border-collapse:collapse;margin-top:10px;font-variant-numeric:tabular-nums}
+#sheet th{color:var(--mute);font-size:12px;text-align:left;font-weight:400}
+#sheet td,#sheet th{padding:6px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+#sheet .pill{font-size:11px;border-radius:10px;padding:1px 7px;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
+#sheet .pill.x{border-color:#d9534f;color:#ff8d8a}#sheet .pill.e{border-color:#e8863a;color:#f4b27a}
+.pc{color:var(--mute)}
+
+.playonly{}
+body.edit .playonly{display:none!important}
+.editonly{display:none!important}
+body.edit .editonly{display:flex!important}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg.wrap{flex-wrap:wrap}
+.seg button{border:0;border-radius:0;background:transparent;padding:5px 10px}
+.seg button.on{background:var(--accent);color:#1a1405;font-weight:700}
+#edtools{flex-wrap:wrap;align-items:center;gap:6px}
+#edtools button.on{border-color:var(--accent);background:#262b3d;color:var(--accent)}
+.chk{display:flex;gap:5px;align-items:center;font-size:12px;color:var(--mute)}
+.sep{width:1px;height:22px;background:var(--line)}
+#inspector{position:absolute;right:0;top:0;bottom:0;width:340px;max-width:92%;background:var(--panel);border-left:1px solid var(--line);padding:14px;overflow:auto;transform:translateX(100%);transition:transform .2s;z-index:6}
+body.edit #inspector{transform:none}
+#inspector h2{font:600 18px var(--disp);margin:0 0 6px}
+#inspector .id{color:var(--mute);font:12px var(--body)}
+#inspector .lab{color:var(--mute);font-size:11px;margin:14px 0 5px;text-transform:uppercase;letter-spacing:.07em}
+#inspector .help{margin:6px 0;padding-left:18px;font-size:13px;color:var(--mute)}
+#inspector .help li{margin:4px 0}
+#inspector input[type=search],#inspector input[type=number]{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+.curperk{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:13px}
+#perkList{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:2px;margin-top:6px}
+.prow{display:block;width:100%;text-align:left;margin:2px 0;padding:6px 8px;background:transparent;border-color:transparent}
+.prow:hover{background:var(--panel2)}
+.prow.on{border-color:var(--accent);background:#262b3d}
+.prow small{display:block;color:var(--mute);font-size:12px}
+.swatches{display:flex;flex-wrap:wrap;gap:6px}
+.sw{width:24px;height:24px;border-radius:50%;border:2px solid transparent;padding:0}
+.sw.on{border-color:#fff}
+.pos{display:flex;gap:8px}.pos label{flex:1;font-size:12px;color:var(--mute)}
+.conn{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid var(--line);font-size:13px}
+.conn button{padding:2px 8px;font-size:12px}
+.danger{border-color:#d9534f;color:#ff8d8a}
+#inspector .ok{color:#6ff2c8}#inspector .bad{color:#ff8d8a}
+.node.sel .halo{stroke:#fff;opacity:1}
+.node.src .halo{stroke:#3b82f6;opacity:1;stroke-width:5}
+.socket{pointer-events:none}
+#svg.editing .socket{pointer-events:all;cursor:pointer}
+.socket.sel rect{stroke:#fff;stroke-width:4}
+.socket.src rect{stroke:#3b82f6;stroke-width:4}
+.edgehit{stroke:transparent;stroke-width:16;fill:none;pointer-events:none}
+#svg.editing .edgehit{pointer-events:stroke;cursor:pointer}
+.edge.esel{stroke:#fff;stroke-opacity:1;stroke-width:4.5}
+#svg.tool-add{cursor:crosshair}
+#svg.pasting,#svg.pasting .node,#svg.pasting .edgehit{cursor:copy}
+#svg.editing.tool-select{cursor:crosshair}
+#svg.editing.tool-select.panning{cursor:grabbing}
+#marquee{position:absolute;display:none;border:1px dashed var(--accent);background:#e3b3411f;pointer-events:none;z-index:4}
+#svg.tool-delete .node,#svg.tool-delete .edgehit{cursor:not-allowed}
+#ioText{width:100%;height:340px;margin-top:10px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace}
+
+body.bal .playonly,body.bal .editonly{display:none!important}
+#balance{position:absolute;inset:0;background:var(--bg);z-index:7;overflow:auto;padding:14px 16px;display:none}
+body.bal #balance{display:block}
+.balhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.balhead h2{font:600 20px var(--disp);margin:0 0 2px}
+.balhead input,.balhead select{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.baltab{overflow-x:auto}
+.baltab table{border-collapse:collapse;min-width:1450px;width:100%}
+.baltab .ok{color:#6ff2c8}.baltab .warn{color:#ffcf6b}.baltab .bad{color:#ff8d8a}
+.tip .ok{color:#6ff2c8}.tip .bad{color:#ff8d8a}
+.baltab th{position:sticky;top:0;background:var(--bg);text-align:left;color:var(--mute);font-weight:400;font-size:12px;padding:6px}
+.baltab td{padding:5px 6px;border-top:1px solid var(--line);vertical-align:top}
+.baltab input,.baltab select{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:4px 6px;width:100%;display:block;margin-bottom:3px}
+.baltab input.num{width:80px}.baltab input.uw{width:110px}.baltab input.wide{min-width:260px}
+.baltab tr.mod td:first-child{box-shadow:inset 3px 0 var(--accent)}
+.baltab .bad{color:#ff8d8a;font-size:12px}.baltab .pc{font-size:12px}
+.stat{font-size:12px;color:var(--mute);padding:3px 8px;border:1px solid var(--line);border-radius:10px}
+.stat.ok{color:#6ff2c8;border-color:#2c6b5a}.stat.warn{color:#ffcf6b;border-color:#6b5a2c}.stat.bad{color:#ff8d8a;border-color:#6b2c2c}
+#diskbar{margin-left:auto}
+#start{position:absolute;inset:0;z-index:20;background:var(--bg);display:none;align-items:center;justify-content:center;padding:16px}
+#start.open{display:flex}
+#start .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;max-width:520px;padding:20px}
+#start h2{font:600 22px var(--disp);margin:0 0 8px}
+#start code{background:var(--panel2);padding:1px 5px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){#toast,#drawer{transition:none}}
+@media (max-width:700px){#legend{display:none}}
+</style>
+</head>
+<body>
+<header id="bar">
+  <div class="brand"><h1>Perk Tree</h1><div class="sub">Reads and writes the data/ folder of your repo</div></div>
+  <nav id="chars" role="tablist" aria-label="Character"></nav>
+  <div class="seg" id="modeSeg" role="group" aria-label="Mode"><button data-m="play" class="on">Play</button><button data-m="edit">Edit</button><button data-m="balance">Balance</button></div>
+  <div class="grp" id="diskbar"><span id="saveStat" class="stat warn">Not connected</span><button id="openBtn">Open repo folder</button></div>
+  <div class="grp editonly" id="edtools">
+    <button data-tool="select" title="Select and move (V). Drag empty space for a selection box, Shift-click for a chain.">Select</button>
+    <button data-tool="add" title="Place nodes (A)">Add node</button>
+    <button data-tool="connect" title="Link nodes (C)">Connect</button>
+    <button data-tool="delete" title="Delete (X)">Delete</button>
+    <span class="sep"></span>
+    <button id="copyBtn" title="Copy the selected nodes and the connections between them (Ctrl+C)">Copy</button>
+    <button id="pasteBtn" title="Paste the copied group: click where it should go, in any character's tree (Ctrl+V). Esc cancels, Shift+click keeps pasting.">Paste</button>
+    <span class="sep"></span>
+    <button id="undoBtn" title="Undo (Ctrl+Z)">Undo</button><button id="redoBtn" title="Redo (Ctrl+Shift+Z)">Redo</button>
+    <label class="chk"><input type="checkbox" id="snapChk" checked> Snap</label>
+    <label class="chk"><input type="checkbox" id="linkChk" checked> Auto-link</label>
+    <button id="ioBtn">Import / export</button><button id="resetLayout">Reset layout</button>
+  </div>
+  <div id="pts" class="playonly" aria-live="polite"></div>
+  <div class="grp playonly"><span class="lab">Win a fight</span>
+    <button id="w1" title="Normal combat: 1 point">+1</button>
+    <button id="w2" title="Elite: 2 points">Elite +2</button>
+    <button id="w3" title="Boss: 3 points">Boss +3</button>
+  </div>
+  <div class="grp playonly">
+    <button id="lock" class="primary" title="Voting on the next map node locks your perks">Pick next map node</button>
+    <button id="refund">Refund pending</button>
+    <button id="sheetBtn">Build sheet</button>
+    <button id="devBtn" aria-expanded="false">Dev</button>
+  </div>
+</header>
+<main id="stage">
+  <svg id="svg" role="application" aria-label="Perk tree. Drag to pan, scroll to zoom, Tab to move between nodes, Enter to allocate."><g id="world"></g></svg>
+  <div id="zoom">
+    <button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zfit">Fit</button>
+    <input id="q" type="search" placeholder="Find an effect" aria-label="Find an effect">
+  </div>
+  <div id="marquee"></div>
+  <div id="tipwrap"></div>
+  <div id="legend"></div>
+  <div id="toast" role="status"></div>
+  <section id="balance" aria-label="Balance"></section>
+  <aside id="inspector" aria-label="Node editor"></aside>
+  <aside id="drawer" aria-label="Dev tools"></aside>
+  <div id="sheet" role="dialog" aria-modal="true" aria-label="Build sheet"><div class="card" id="sheetCard"></div></div>
+</main>
+<div id="start" role="dialog" aria-label="Open repo folder"><div class="card">
+  <h2>StS2 perk tree editor</h2>
+  <p>Open the folder of your perk-tree repo (the one that contains <code>data/perks.json</code>). The editor reads the perk list and the five trees from there and saves every change back to the same files, so git sees them.</p>
+  <div class="grp"><button id="openFolder" class="primary">Open repo folder</button><button id="reopenFolder" style="display:none">Reopen last folder</button></div>
+  <p id="startMsg" class="pc"></p>
+  <p class="pc">Works in Chrome and Edge. Your browser asks once per session for permission to edit the folder.</p>
+</div></div>
+
+<script>
+(()=>{
+'use strict';
+/* ================= data (loaded at runtime from the repo's data/ folder) ================= */
+const SC={S:{n:'Self',d:'Affects only you.'},E:{n:'Enemies, through you',d:'Changes what enemies take from you.'},X:{n:'Shared enemy modifier',d:"Changes the enemy for every player. Affects all players' attacks."}};
+let KWINFO={},MODSUP=null,FX={},KW={},KWRE=[],KWGAP=new Set(),MODS={},CHARS={},NONGENERAL=new Set(),CHAR_FX={},TARGETS={},SWATCHES=[];
+let PERKORDER=[],PERKRAW={},ORIGFX={},PERKHELP='',SYN=[],ANTI=[],LUCK=[];
+const synMap={},antiMap={};
+// a perk is "chancy" when it is a chance perk or has a trigger chance below 100%; luck modifiers pair with all of them
+// a perk's default chance in percent: 100 when unset; above 100 gives sure successes plus a roll (see mod/docs/chance-model.md)
+const chanceOf=f=>f.kind==='pct'||f.chance==null?100:f.chance;
+const nodeChancy=id=>!!TR&&TR.nodes.some(n=>n.kind==='perk'&&n.fx===id&&n.chance!=null&&n.chance<100);
+// any node of this perk whose own chance is not 100 (what the mod must be able to roll)
+const nodeOff100=id=>!!TR&&TR.nodes.some(n=>n.kind==='perk'&&n.fx===id&&n.chance!=null&&n.chance!==100);
+const isChancy=f=>f.kind==='pct'||chanceOf(f)<100||nodeChancy(f.id);
+// a node's own chance (percent): its override if it has one, else the perk's
+const nodeChance=n=>n.chance!=null?n.chance:chanceOf(FX[n.fx]);
+// a node's own amount (what it gives each time it succeeds): its override if it has one, else the perk's number
+const nodeAmount=n=>n.amount!=null?n.amount:FX[n.fx].unit;
+// the mod never rolls these perks (data/mod-support.json says rollsChance is false), so their chance stays 100
+const lockedChance=f=>!!MODSUP&&!!MODSUP.effects[f.id]&&!MODSUP.effects[f.id].rollsChance;
+function synSet(id){
+  const out=new Set(synMap[id]||[]);
+  if(LUCK.includes(id))Object.values(FX).forEach(f=>{if(isChancy(f))out.add(f.id);});
+  else if(FX[id]&&isChancy(FX[id]))LUCK.forEach(p=>{if(FX[p])out.add(p);});
+  return out;
+}
+function kwsOf(f){
+  // explicit keywords (the mod's native ids) first; keywords with no game tooltip yet (gap) are still found by reading the text
+  const out=[],add=k=>{if(KWINFO[k]&&!KWINFO[k].inline&&!out.includes(k))out.push(k);};
+  const explicit=Array.isArray(f.keywords);
+  if(explicit)f.keywords.forEach(add);
+  KWRE.forEach(([k,re])=>{if((!explicit||KWGAP.has(k))&&re.test(f.text))add(k);});
+  return out.slice(0,4);
+}
+function checkModule(id,m){
+  [['S',2],['M',2],['LL',2],['LR',2],['OL',6],['OR',6],['ring',3],['F',1],['L0',1],['T',1],['K',1]].forEach(([k,n])=>{
+    if(!Array.isArray(m[k])||m[k].length!==n)throw new Error('modules.json: '+id+'.'+k+' needs '+n+' perk ids');
+    m[k].forEach(p=>{if(!FX[p])throw new Error('modules.json: '+id+'.'+k+' uses unknown perk '+p);});
+  });
+  if(!m.color||!m.tag)throw new Error('modules.json: '+id+' needs tag and color');
+}
+const mkFx=p=>({id:p.id,name:p.name,group:p.group||'general',sc:p.scope,kind:p.kind,unit:p.unit,text:p.text,uw:p.unit_label,cap:p.cap,base:p.base,tier:p.tier,note:p.note,mult:p.multiplier,chance:p.chance,keywords:p.keywords,percent:p.percent});
+function initData(D){
+  FX={};PERKORDER=[];PERKRAW={};ORIGFX={};PERKHELP=D.perks._help||'';
+  D.perks.perks.forEach(p=>{
+    PERKORDER.push(p.id);PERKRAW[p.id]=p;
+    FX[p.id]=mkFx(p);
+    ORIGFX[p.id]=Object.assign({},FX[p.id]);
+  });
+  KW={};KWINFO={};KWRE=[];KWGAP=new Set();MODSUP=D.support||null;
+  Object.entries(D.keywords.keywords).forEach(([k,v])=>{KW[k]=v.text;KWINFO[k]=v;KWRE.push([k,new RegExp(v.match||k)]);if(v.gap)KWGAP.add(k);});
+  SYN=D.pairs.synergy||[];ANTI=D.pairs.conflicts||[];LUCK=D.pairs.luckModifiers||[];
+  [synMap,antiMap].forEach(m=>Object.keys(m).forEach(k=>delete m[k]));
+  const lk=(map,a,b)=>{(map[a]=map[a]||new Set()).add(b);(map[b]=map[b]||new Set()).add(a);};
+  SYN.forEach(g=>g.perks.forEach(a=>g.with.forEach(b=>{if(FX[a]&&FX[b])lk(synMap,a,b);})));
+  ANTI.forEach(g=>g.perks.forEach(a=>g.with.forEach(b=>{if(FX[a]&&FX[b])lk(antiMap,a,b);})));
+  MODS=D.modules.modules;CHARS=D.modules.characters;TARGETS=D.modules.targets||{};
+  Object.entries(MODS).forEach(([id,m])=>checkModule(id,m));
+  CHAR_FX={};NONGENERAL=new Set();
+  Object.values(FX).forEach(f=>{if(f.group!=='general'){NONGENERAL.add(f.id);if(CHARS[f.group])(CHAR_FX[f.group]=CHAR_FX[f.group]||[]).push(f.id);}});
+  SWATCHES=[...new Set(Object.values(MODS).map(m=>m.color).concat(['#e3b341','#c9ccd6']))];
+}
+
+/* ================= glyph per effect category ================= */
+function glyph(id){
+  const t=id;
+  if(/proc|chance|random_debuff/.test(t))return '◈';
+  if(/vulnerable|weak|frail|strip|doom|poison|spread|replay|symmetric/.test(t))return '☠';
+  if(/gold/.test(t))return '¤';
+  if(/potion/.test(t))return '⚗';
+  if(/heal|regen|second_wind|wellspring/.test(t))return '✚';
+  if(/energy|discharge|overclock/.test(t))return '✦';
+  if(/draw|retain|discard|first_turn/.test(t))return '≡';
+  if(/vigor/.test(t))return '↯';
+  if(/star|forge|orb|focus|shiv|summon|channel/.test(t))return '✧';
+  if(/block|thorns|artifact|buffer|blur|armor|dexterity/.test(t))return '◆';
+  if(/strength|damage|ping|execute|attack/.test(t))return '▲';
+  return '●';
+}
+
+/* ================= value helpers ================= */
+// as: the amounts of the n perks when they are not all the perk's own number (per-node overrides); without it every perk gives f.unit
+const sumOf=(f,n,as)=>as&&as.length===n?as.reduce((a,b)=>a+b,0):n*f.unit;
+function V(f,n,as){let v=f.kind==='flag'?Math.min(n,1):sumOf(f,n,as);if(f.cap!=null)v=Math.min(v,f.cap);return Math.round(v*1e6)/1e6;}   // rounded so 3 x 0.2 reads 0.6, not 0.6000000000000001
+// trigger chance: every perk of a guaranteed effect can be given a chance below 100; text without {c} gets a "N% chance:" lead-in
+function T(f,n,cc,as,u){
+  // with a trigger chance other than 100 the text describes ONE perk ({u}); every placed perk rolls on its own. cc: a node's own chance
+  // u: the amount of THIS perk (a node's override), as: the amounts of all n perks when they differ
+  const k=Math.max(n,1),c=cc==null?chanceOf(f):cc,per=c!==100&&f.kind!=='pct',ua=u==null?f.unit:u,v=per?V(f,1,[ua]):V(f,k,as);
+  const o={v,u:ua,m:f.mult?1+sumOf(f,k,as):1+k,x:Math.max(0,(f.base||0)-v),d:v*2,h:v/2,c};
+  let t=f.text.replace(/\{(\w+)\}/g,(_,a)=>o[a]);
+  if(per&&!/\{c\}/.test(f.text))t=c+'% chance: '+t;
+  return t;
+}
+// cs: the chance of each placed perk of this effect (percent), when they are not all the perk's own
+function F(f,n,cs,as){
+  if(n<=0)return '\u2014';
+  const amt=as&&as.length===n?as:new Array(n).fill(f.unit);
+  if(f.mult)return 'x'+(1+amt.reduce((a,b)=>a+b,0));
+  const v=V(f,n,amt),list=cs&&cs.length===n?cs:new Array(n).fill(chanceOf(f));
+  if(f.kind!=='pct'&&list.some(c=>c!==100)){
+    if(f.kind==='flag')return 'Active ('+list[0]+'% chance)';
+    const sameC=list.every(c=>c===list[0]),sameA=amt.every(a=>a===amt[0]),avg=+(list.reduce((a,c,i)=>a+amt[i]*c/100,0)).toFixed(2),uw=f.uw?' '+f.uw:'';
+    if(sameC&&sameA)return n+' x '+list[0]+'% of +'+amt[0]+uw+' (avg '+avg+')';
+    if(sameA)return n+' perks, mixed chances, +'+amt[0]+uw+' each (avg '+avg+')';
+    return n+' perks, mixed amounts'+(sameC?' at '+list[0]+'%':' and chances')+' (avg '+avg+uw+')';
+  }
+  if(f.kind==='flag')return 'Active';
+  if(f.kind==='pct')return v+'%';
+  if(f.uw==='%')return '+'+v+'%';
+  return '+'+v+(f.uw?' '+f.uw:'');
+}
+function amountsOf(fid){return TR.nodes.filter(n=>n.kind==='perk'&&n.fx===fid&&allocated(n)).map(nodeAmount);}
+function treeAmounts(fid){return TR.nodes.filter(n=>n.kind==='perk'&&n.fx===fid).map(nodeAmount);}
+function chancesOf(fid){return TR.nodes.filter(n=>n.kind==='perk'&&n.fx===fid&&allocated(n)).map(nodeChance);}
+function treeChances(fid){return TR.nodes.filter(n=>n.kind==='perk'&&n.fx===fid).map(nodeChance);}
+function wasted(f,n,as){return f.cap!=null&&sumOf(f,n,as)>f.cap;}
+
+/* ================= tree builder: start, 4 spokes, inner ring, outer ring, 8 module slots ================= */
+const RI=300,RO=810;
+function build(ck){
+  const C=CHARS[ck],nodes=[],edges=[];
+  const A=s=>-Math.PI/2+s*Math.PI/4;
+  function node(o){o.i=nodes.length;o.id='n'+o.i;o.raw=new Set();o.adj=new Set();nodes.push(o);return o;}
+  function edge(a,b,o){
+    const e=Object.assign({a,b},o||{});
+    e.color=(a.kind!=='socket'?a:b).color||'#e3b341';
+    edges.push(e);a.raw.add(b);b.raw.add(a);return e;
+  }
+  const pol=(ang,r)=>[Math.cos(ang)*r,Math.sin(ang)*r];
+  const modAt=s=>{const id=C.slots[((s%8)+8)%8];return id?MODS[id]:null;};
+  const hub=node({fx:C.start,x:0,y:0,tier:'start',kind:'perk',color:'#e3b341',mod:'start'});
+  const inS=[],outS=[];
+  for(let s=0;s<8;s++){
+    const p=pol(A(s),RI),q=pol(A(s),RO);
+    inS.push(node({kind:'socket',x:p[0],y:p[1],slot:s,ring:'inner'}));
+    outS.push(node({kind:'socket',x:q[0],y:q[1],slot:s,ring:'outer'}));
+  }
+  // modules
+  C.slots.forEach((id,s)=>{
+    if(!id)return;
+    const m=MODS[id],ang=A(s),ux=Math.cos(ang),uy=Math.sin(ang),px=-uy,py=ux,rot=ang*180/Math.PI;
+    const P=(u,v)=>[(RI+u)*ux+v*px,(RI+u)*uy+v*py];
+    const mk=(fxid,u,v,slotTier)=>{const p=P(u,v);return node({fx:fxid,x:p[0],y:p[1],tier:FX[fxid].tier==='key'?'cap':slotTier,kind:'perk',color:m.color,mod:s,modId:id,tag:m.tag});};
+    const link=(a,b,rx,ry,side)=>edge(a,b,{slot:s,arc:rx?{rx,ry,rot:+rot.toFixed(2),sweep:side<0?1:0}:null});
+    const S0=mk(m.S[0],40,0,'small'),S1=mk(m.S[1],80,0,'small'),Fk=mk(m.F[0],122,0,'small');
+    const M0=mk(m.M[0],160,0,'small'),M1=mk(m.M[1],198,0,'small'),L0=mk(m.L0[0],236,0,'small');
+    const Tn=mk(m.T[0],344,0,'notable'),K=mk(m.K[0],424,0,'cap');
+    link(inS[s],S0);link(S0,S1);link(S1,Fk);link(Fk,M0);link(M0,M1);link(M1,L0);link(Tn,K);link(K,outS[s]);
+    [-1,1].forEach(side=>{
+      const lens=(side<0?m.LL:m.LR).map((fxid,j)=>{const th=(j+1)*Math.PI/3;return mk(fxid,290-54*Math.cos(th),side*40*Math.sin(th),'small');});
+      link(L0,lens[0],54,40,side);link(lens[0],lens[1],54,40,side);link(lens[1],Tn,54,40,side);
+      const ov=(side<0?m.OL:m.OR).map((fxid,j)=>{const th=(j+1)*Math.PI/7;return mk(fxid,273-151*Math.cos(th),side*100*Math.sin(th),j===3?'notable':'small');});
+      link(Fk,ov[0],151,100,side);for(let j=0;j<5;j++)link(ov[j],ov[j+1],151,100,side);link(ov[5],K,151,100,side);
+    });
+  });
+  // rings, spokes, connectors
+  const pick=(g,j,outer)=>{
+    const a=modAt(g),b=modAt(g+1),k=outer?2:0;
+    if(j===0){const m=a||b;return[m.ring[k],m.color];}
+    if(j===2){const m=b||a;return[m.ring[k],m.color];}
+    const m=(((g%2===0)!==outer)?a:b)||a||b;return[m.ring[1],m.color];
+  };
+  const gapNodes={inner:[],outer:[]};
+  for(let g=0;g<8;g++){
+    ['inner','outer'].forEach(rg=>{
+      const R=rg==='inner'?RI:RO,sockets=rg==='inner'?inS:outS,list=[];
+      for(let j=0;j<3;j++){
+        const [fxid,col]=pick(g,j,rg==='outer'),p=pol(A(g)+(j+1)*Math.PI/16,R);
+        list.push(node({fx:fxid,x:p[0],y:p[1],tier:'small',kind:'perk',color:col,mod:'ring'}));
+      }
+      gapNodes[rg].push(list);
+      const chain=[sockets[g]].concat(list,[sockets[(g+1)%8]]);
+      for(let j=0;j<chain.length-1;j++)edge(chain[j],chain[j+1],{ring:rg,arc:{rx:R,ry:R,rot:0,sweep:1}});
+    });
+  }
+  [0,2,4,6].forEach(s=>{
+    const m=modAt(s)||modAt(s+1),ang=A(s);let prev=hub;
+    for(let j=0;j<3;j++){const p=pol(ang,75*(j+1));const n=node({fx:m.ring[j],x:p[0],y:p[1],tier:'small',kind:'perk',color:m.color,mod:'ring'});edge(prev,n);prev=n;}
+    edge(prev,inS[s]);
+  });
+  [0,2,4,6].forEach(g=>{
+    const a=modAt(g),b=modAt(g+1),ang=A(g)+Math.PI/8;let prev=gapNodes.inner[g][1];
+    for(let j=0;j<6;j++){
+      const m=((j%2===0)?(a||b):(b||a)),p=pol(ang,RI+(j+1)*(RO-RI)/7);
+      const n=node({fx:m.ring[Math.floor(j/2)%3],x:p[0],y:p[1],tier:'small',kind:'perk',color:m.color,mod:'ring'});edge(prev,n);prev=n;
+    }
+    edge(prev,gapNodes.outer[g][1]);
+  });
+  nodes.forEach(n=>{if(n.kind==='perk'&&!FX[n.fx])throw new Error('unknown effect '+n.fx);});
+  const TY={small:'minor',notable:'notable',cap:'cap',start:'start'};
+  return{version:1,
+    nodes:nodes.map(n=>({id:n.id,x:+n.x.toFixed(1),y:+n.y.toFixed(1),type:n.kind==='socket'?'socket':TY[n.tier],fx:n.kind==='socket'?null:n.fx,color:n.color||null,mod:n.mod===undefined?null:n.mod,tag:n.tag||null})),
+    edges:edges.map(e=>({a:e.a.id,b:e.b.id,arc:e.arc||null,slot:e.slot===undefined?null:e.slot}))};
+}
+function pathFor(a,b,arc){
+  const m='M'+a.x.toFixed(1)+' '+a.y.toFixed(1);
+  if(!arc)return m+'L'+b.x.toFixed(1)+' '+b.y.toFixed(1);
+  return m+'A'+arc.rx+' '+arc.ry+' '+arc.rot+' 0 '+arc.sweep+' '+b.x.toFixed(1)+' '+b.y.toFixed(1);
+}
+function sanitize(L){
+  if(!L||!Array.isArray(L.nodes)||!Array.isArray(L.edges))return null;
+  const ids=new Set(),nodes=[];
+  L.nodes.forEach(d=>{
+    if(!d||typeof d.id!=='string'||ids.has(d.id)||!isFinite(d.x)||!isFinite(d.y))return;
+    ids.add(d.id);
+    nodes.push({id:d.id,x:+d.x,y:+d.y,type:['minor','notable','cap','socket','start'].includes(d.type)?d.type:'minor',fx:FX[d.fx]?d.fx:null,chance:(isFinite(d.chance)&&d.chance>0&&d.chance<=10000)?+d.chance:undefined,amount:(isFinite(d.amount)&&d.amount!==0&&d.amount!==null)?+d.amount:undefined,color:typeof d.color==='string'?d.color:null,mod:d.mod===undefined?null:d.mod,tag:typeof d.tag==='string'?d.tag:null});
+  });
+  if(!nodes.length)return null;
+  const seen=new Set(),edges=[];
+  L.edges.forEach(e=>{
+    if(!e||!ids.has(e.a)||!ids.has(e.b)||e.a===e.b)return;
+    const k=[e.a,e.b].sort().join('|');if(seen.has(k))return;seen.add(k);
+    const arc=e.arc&&isFinite(e.arc.rx)&&isFinite(e.arc.ry)?{rx:+e.arc.rx,ry:+e.arc.ry,rot:+e.arc.rot||0,sweep:e.arc.sweep?1:0}:null;
+    edges.push({a:e.a,b:e.b,arc,slot:e.slot===undefined?null:e.slot});
+  });
+  return{version:1,nodes,edges};
+}
+function compile(L,ck){
+  const TI={minor:'small',notable:'notable',cap:'cap',start:'start'};
+  const nodes=L.nodes.map((d,i)=>{
+    const sock=d.type==='socket';
+    return{i,id:d.id,x:d.x,y:d.y,kind:sock?'socket':'perk',tier:sock?'socket':(TI[d.type]||'small'),fx:sock?null:(FX[d.fx]?d.fx:'start_block'),chance:d.chance==null?undefined:d.chance,amount:d.amount==null?undefined:d.amount,color:d.color||'#c9ccd6',mod:d.mod===null||d.mod===undefined?undefined:d.mod,tag:d.tag||'custom',raw:new Set(),adj:new Set()};
+  });
+  const byId={};nodes.forEach(n=>{byId[n.id]=n;});
+  const edges=[];
+  L.edges.forEach(d=>{
+    const a=byId[d.a],b=byId[d.b];if(!a||!b||a===b)return;
+    const e={a,b,arc:d.arc||null,slot:d.slot===null||d.slot===undefined?undefined:d.slot,id:[d.a,d.b].sort().join('|'),color:(a.kind!=='socket'?a:b).color};
+    e.d=pathFor(a,b,e.arc);edges.push(e);a.raw.add(b);b.raw.add(a);
+  });
+  // Any number of start nodes. Each is an entry point: it can be taken at any time without a neighbour, and the cost of every other
+  // node is counted from whichever start is nearest.
+  const starts=nodes.filter(n=>n.tier==='start'),hub=starts[0]||null;
+  // adjacency: sockets are free joints, so their neighbours become adjacent to each other
+  nodes.forEach(n=>{if(n.kind!=='socket')n.raw.forEach(m=>{if(m.kind!=='socket')n.adj.add(m);});});
+  nodes.forEach(n=>{if(n.kind==='socket'){const nb=[...n.raw].filter(m=>m.kind!=='socket');nb.forEach(a=>nb.forEach(b=>{if(a!==b)a.adj.add(b);}));}});
+  // points to reach each node from the start (sockets cost nothing)
+  const N=nodes.length,dist=new Array(N).fill(1e9),prev=new Array(N).fill(-1),done=new Array(N).fill(false);
+  if(starts.length){
+    starts.forEach(s0=>{dist[s0.i]=1;});
+    for(let it=0;it<N;it++){
+      let u=-1;for(let i=0;i<N;i++)if(!done[i]&&(u<0||dist[i]<dist[u]))u=i;
+      if(u<0||dist[u]>=1e9)break;done[u]=true;
+      nodes[u].raw.forEach(v=>{const w=v.kind==='socket'?0:1;if(dist[u]+w<dist[v.i]){dist[v.i]=dist[u]+w;prev[v.i]=u;}});
+    }
+  }
+  nodes.forEach(n=>{n.cost=dist[n.i];});
+  return{ck,C:CHARS[ck],nodes,edges,hub,starts,byId,prev};
+}
+
+/* ================= state ================= */
+const trees={},st={};
+let cur=null,TR=null,showLabels=false,showSyn=true;
+const layouts={};
+function layoutFor(ck){if(!layouts[ck])layouts[ck]=build(ck);return layouts[ck];}
+function treeFor(ck){if(!trees[ck])trees[ck]=compile(layoutFor(ck),ck);return trees[ck];}
+function stateFor(ck){
+  if(!st[ck]){
+    // Nothing allocated: not even the start node. Allocated nodes change what the tooltips say (the text shows the total after
+    // taking one more), so a clean slate is the way to read a perk's true per-node value. Points are still there to spend.
+    st[ck]={earned:12,committed:new Set(),pending:new Set(),locked:false};
+  }
+  return st[ck];
+}
+const S=()=>st[cur];
+function allocated(n){const s=S();return s.committed.has(n.id)||s.pending.has(n.id);}
+function unspent(){const s=S();return s.earned-s.committed.size-s.pending.size;}
+function countOf(fid){let c=0;TR.nodes.forEach(n=>{if(n.kind==='perk'&&n.fx===fid&&allocated(n))c++;});return c;}
+function canAlloc(n){
+  const s=S();
+  if(n.kind!=='perk'||allocated(n)||s.locked||unspent()<=0)return false;
+  if(n.tier==='start')return true;   // an entry point: no neighbour needed, at any time (it still costs a point)
+  for(const m of n.adj)if(allocated(m))return true;
+  return false;
+}
+function connectedWithout(rem){
+  const s=S();
+  const set=new Set([...s.committed,...s.pending]);set.delete(rem.id);
+  if(set.size===0)return true;
+  // every node left must still be linked to an allocated start through allocated nodes
+  const seen=new Set(),q=[];
+  TR.starts.forEach(s0=>{if(set.has(s0.id)){seen.add(s0.id);q.push(s0);}});
+  while(q.length){const n=q.shift();n.adj.forEach(m=>{if(set.has(m.id)&&!seen.has(m.id)){seen.add(m.id);q.push(m);}});}
+  return seen.size===set.size;
+}
+
+/* ================= rendering ================= */
+const svg=document.getElementById('svg'),world=document.getElementById('world');
+const tipwrap=document.getElementById('tipwrap'),toastEl=document.getElementById('toast');
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+let nodeEls={},edgeEls=[],sockEls=[],elById={};
+function draw(){
+  world.innerHTML='';nodeEls={};edgeEls=[];sockEls=[];elById={};
+  const gR=el('g',{},world),gE=el('g',{},world),gS=el('g',{},world),gN=el('g',{},world),gL=el('g',{id:'labels'},world);
+  el('circle',{cx:0,cy:0,r:RI,fill:'none',stroke:'#2a2a2a','stroke-width':1},gR);
+  TR.edges.forEach(e=>{
+    const p=el('path',{d:e.d,class:'edge'},gE);p.style.setProperty('--ec',e.color);
+    const h=el('path',{d:e.d,class:'edgehit'},gE);
+    h.addEventListener('pointerdown',ev=>{if(mode!=='edit'||ev.button!==0)return;ev.stopPropagation();edgeClick(e);});
+    edgeEls.push({e,p,h});
+  });
+  TR.nodes.forEach(n=>{
+    if(n.kind==='socket'){
+      const g=el('g',{class:'socket',transform:'translate('+n.x+' '+n.y+')'},gS);
+      el('rect',{x:-9,y:-9,width:18,height:18},g);
+      const t=el('title',{},g);t.textContent='Free attachment socket';
+      sockEls.push({n,g});elById[n.id]=g;wireEdit(g,n);return;
+    }
+    const f=FX[n.fx];
+    const g=el('g',{class:'node '+n.tier,tabindex:'0',role:'button','aria-label':f.name+', '+SC[f.sc].n,transform:'translate('+n.x+' '+n.y+')'},gN);
+    g.style.setProperty('--c',n.color);
+    let gs=11;
+    if(n.tier==='cap'){
+      el('rect',{class:'halo',x:-26,y:-26,width:52,height:52,transform:'rotate(45)'},g);
+      el('rect',{class:'shape',x:-14,y:-14,width:28,height:28,transform:'rotate(45)'},g);gs=15;
+    }else if(n.tier==='notable'){
+      el('circle',{class:'halo',r:24},g);el('circle',{class:'shape',r:15},g);el('circle',{class:'inner',r:9},g);gs=12;
+    }else if(n.tier==='start'){
+      el('circle',{class:'halo',r:26},g);el('circle',{class:'shape',r:17},g);gs=18;
+    }else{el('circle',{class:'halo',r:20},g);el('circle',{class:'shape',r:10},g);gs=11;}
+    const t=el('text',{class:'glyph','font-size':gs},g);t.textContent=n.tier==='start'?'★':glyph(n.fx);
+    const br=n.tier==='cap'?19:(n.tier==='notable'?13:9);
+    if(f.sc==='X')el('path',{class:'badge',d:'M0 -6L6 0L0 6L-6 0Z',transform:'translate('+br+' '+(-br)+')',fill:'#ff5d5d',stroke:'#161616','stroke-width':1.5},g);
+    if(f.sc==='E')el('path',{class:'badge',d:'M0 -6L6 5L-6 5Z',transform:'translate('+br+' '+(-br)+')',fill:'#f4a04a',stroke:'#161616','stroke-width':1.5},g);
+    g.addEventListener('pointerenter',()=>showTip(n,g));
+    g.addEventListener('pointerleave',()=>hideTip());
+    g.addEventListener('focus',()=>showTip(n,g));
+    g.addEventListener('blur',()=>hideTip());
+    g.addEventListener('click',ev=>{ev.stopPropagation();if(mode==='play')click(n);});
+    g.addEventListener('contextmenu',ev=>{ev.preventDefault();if(mode==='play'&&S().pending.has(n.id))click(n);});
+    g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();if(mode==='edit')selectNode(n.id);else click(n);}});
+    nodeEls[n.id]=g;elById[n.id]=g;wireEdit(g,n);
+  });
+  const cap=(x,y,txt,cls)=>{const t=el('text',{x,y,class:cls||'capt'},gL);t.textContent=txt;return t;};
+  cap(0,40,'Start','capt show');cap(0,-RO-52,'Outer travel ring','capt show');cap(0,-RI+34,'Inner travel ring','capt show');
+  TR.C.slots.forEach((id,s)=>{
+    const a=-Math.PI/2+s*Math.PI/4,r=RO+88;
+    const t=cap(Math.cos(a)*r,Math.sin(a)*r,id?MODS[id].tag.replace(/_/g,' '):'free socket','lbl');
+  });
+  gL.classList.toggle('showlbl',showLabels);
+  if(pasting)buildGhost();
+  refresh();paintSel();
+}
+function refresh(){
+  const s=S();const spend=unspent();
+  TR.nodes.forEach(n=>{
+    if(n.kind==='socket')return;
+    const g=nodeEls[n.id];
+    const pl=mode==='play',isC=pl&&s.committed.has(n.id),isP=pl&&s.pending.has(n.id);
+    g.classList.toggle('alloc',isC);g.classList.toggle('pend',isP);
+    g.classList.toggle('avail',pl&&!isC&&!isP&&canAlloc(n));
+  });
+  sockEls.forEach(({n,g})=>{let lit=false;n.raw.forEach(m=>{if(m.kind!=='socket'&&allocated(m))lit=true;});n.lit=lit&&mode==='play';g.classList.toggle('lit',n.lit);});
+  edgeEls.forEach(({e,p})=>{
+    const a=e.a.kind==='socket'?e.a.lit:allocated(e.a),b=e.b.kind==='socket'?e.b.lit:allocated(e.b);
+    const pl2=mode==='play';p.classList.toggle('on',pl2&&!!(a&&b));p.classList.toggle('half',pl2&&a!==b);
+  });
+  document.getElementById('pts').innerHTML=
+    '<div class="big"><span class="k">Unspent</span><b>'+spend+'</b></div>'+
+    '<div><span class="k">Pending</span><b>'+s.pending.size+'</b></div>'+
+    '<div><span class="k">Committed</span><b>'+s.committed.size+'</b></div>'+
+    '<div title="A full run is about 35 to 45 points"><span class="k">Earned (run: 35-45)</span><b>'+s.earned+'</b></div>'+
+    '<div><span class="k">Map</span><b style="font-size:14px">'+(s.locked?'Locked':'Open')+'</b></div>';
+  document.getElementById('lock').disabled=s.locked;
+  document.getElementById('refund').disabled=s.locked||s.pending.size===0;
+  applyQuery();
+  if(document.getElementById('drawer').classList.contains('open'))renderDrawer();
+}
+function applyQuery(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  TR.nodes.forEach(n=>{
+    if(n.kind==='socket')return;
+    const g=nodeEls[n.id],f=FX[n.fx];
+    const hit=q&&(f.name.toLowerCase().includes(q)||n.fx.includes(q.replace(/\s+/g,'_'))||T(f,1).toLowerCase().includes(q));
+    g.classList.toggle('match',!!hit);
+    g.classList.toggle('dim',!!q&&!hit);
+  });
+}
+
+/* ================= interaction ================= */
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>toastEl.classList.remove('show'),2600);}
+function click(n){
+  const s=S();
+  if(s.locked){toast('Locked. You picked the next map node, so perks stay fixed until the next map screen.');return;}
+  if(s.committed.has(n.id)){toast('Committed perks are permanent in v1. A later respec item could refund them.');return;}
+  if(s.pending.has(n.id)){
+    if(!connectedWithout(n)){toast('Refunding this would cut off other nodes. Refund the ones past it first.');return;}
+    s.pending.delete(n.id);refresh();showTip(n,nodeEls[n.id]);return;
+  }
+  if(unspent()<=0){toast('No unspent points. Win a fight to earn more.');return;}
+  if(!canAlloc(n)){toast('Allocate next to a node you already own, or take a start node.');return;}
+  s.pending.add(n.id);refresh();showTip(n,nodeEls[n.id]);
+}
+// what the mod does with a perk today (data/mod-support.json, made by tools/scan-mod.mjs)
+function modStatus(f,nodeCh){
+  if(!MODSUP)return null;
+  const s=MODSUP.effects[f.id];
+  if(!s)return {cls:'warn',text:'No mod code yet: this perk does nothing in game.'};
+  if(!s.rollsChance){
+    if(chanceOf(f)!==100||(nodeCh!=null&&nodeCh!==100)||nodeOff100(f.id))return {cls:'bad',text:'The mod never rolls this perk, so it always triggers in game. Set its chance back to 100.'};
+    return {cls:'ok',text:'Runs in game. Always 100%: the mod does not roll this perk.'};
+  }
+  return {cls:'ok',text:'Runs in game. A chance other than 100% is rolled with the game\'s seeded RNG (above 100 gives sure successes plus a roll).'};
+}
+// your luck perks change the roll of every chancy perk: (chance + proc_boost) x (1 + proc_double), proc_reroll adds tries (mirrors ModifierMath.ProcChance and ChanceMath.RollTotal)
+// the luck perks' totals for a set of placed nodes, each one CLAMPED to its perk's cap like the mod's committed totals (Priming's cap of +15 means +15 however many are placed)
+function luckFrom(nodes){
+  const total=id=>{const f=FX[id],as=nodes.filter(n=>n.fx===id).map(nodeAmount);return f&&as.length?V(f,as.length,as):0;};
+  return {boost:total('proc_boost')/(FX.proc_boost&&FX.proc_boost.percent?100:1),dbl:total('proc_double'),rr:total('proc_reroll')};
+}
+function luckLine(f,c0){
+  if(mode!=='play'||f.kind==='pct'||c0>=100)return '';
+  const {boost,dbl,rr}=luckFrom(TR.nodes.filter(n=>n.kind==='perk'&&allocated(n)));
+  if(!boost&&!dbl&&!rr)return '';
+  const c=(c0/100+boost)*(1+dbl),sure=Math.floor(c),rem=+(c-sure).toFixed(4),tries=1+Math.min(4,Math.floor(rr));
+  const pct=+(c*100).toFixed(1);
+  return '<p class="syn">With your luck perks: '+pct+'% per perk'+(sure>0?' ('+sure+' guaranteed'+(rem>0?', then '+Math.round(rem*100)+'%':'')+')':'')+(tries>1&&rem>0?', up to '+tries+' tries for the last one':'')+'.</p>';
+}
+const TIERNAME={small:'Minor perk',notable:'Notable',cap:'Capstone',start:'Start node'};
+function showTip(n,g){
+  const f=FX[n.fx],s=S();
+  const cnt=countOf(n.fx),isA=allocated(n),after=isA?cnt:cnt+1,nc=nodeChance(n),cs=chancesOf(n.fx),ss=synSet(n.fx);
+  const na=nodeAmount(n),as=amountsOf(n.fx),asAfter=isA?as:as.concat([na]);
+  const chips=['<span class="chip '+f.sc.toLowerCase()+'">'+SC[f.sc].n+'</span>'];
+  chips.push('<span class="chip '+(n.tier==='cap'?'k':'')+'">'+TIERNAME[n.tier]+'</span>');
+  if(f.tier==='key')chips.push('<span class="chip k">Built-in cost</span>');
+  if(f.kind!=='pct'&&nc!==100)chips.push('<span class="chip">'+nc+'% chance</span>');
+  let h='<h3>'+f.name+'</h3><div class="chips">'+chips.join('')+'</div>';
+  h+='<p class="txt">'+T(f,Math.max(after,1),nc,asAfter,na)+'</p>';
+  if(n.chance!=null)h+='<p class="sm">This node has its own chance ('+n.chance+'%). The perk\'s default is '+chanceOf(f)+'%.</p>';
+  if(n.amount!=null&&f.kind!=='flag')h+='<p class="sm">This node has its own amount ('+n.amount+'). The perk\'s default is '+f.unit+'.</p>';
+  if(isA)h+='<p class="tot">Total now: '+F(f,cnt,cs,as)+' ('+cnt+' perk'+(cnt===1?'':'s')+')</p>';
+  else h+='<p class="tot">Total: '+F(f,cnt,cs,as)+' → '+F(f,cnt+1,cs.concat([nc]),asAfter)+'</p>';
+  if(f.cap!=null){
+    if(wasted(f,after,asAfter))h+='<p class="warn">Cap reached. Anything past it is wasted.</p>';
+    else h+='<p class="sm">Cap: '+f.cap+' points.</p>';
+  }
+  if(f.kind!=='pct'&&(nc!==100||cs.some(c=>c!==100)))h+='<p class="sm">Every perk of this effect rolls on its own, each time it triggers. Luck perks only help rolls below 100%.</p>';
+  if(f.sc==='X')h+='<p class="sm">'+SC.X.d+'</p>';
+  if(f.note)h+='<p class="warn">'+f.note+'</p>';
+  h+=luckLine(f,nc);
+  const ms=modStatus(f,nc);if(ms)h+='<p class="sm '+ms.cls+'">'+ms.text+'</p>';
+  const syn=[...ss].map(i=>FX[i].name),anti=[...(antiMap[n.fx]||[])].map(i=>FX[i].name);
+  if(syn.length)h+='<p class="syn">Pairs with: '+syn.slice(0,6).join(', ')+(syn.length>6?' +'+(syn.length-6)+' more':'')+'</p>';
+  if(anti.length)h+='<p class="anti">Works against: '+anti.slice(0,5).join(', ')+(anti.length>5?' +'+(anti.length-5)+' more':'')+'</p>';
+  const state=mode==='edit'?'Click to edit this node. Drag to move it.':s.committed.has(n.id)?'Committed (permanent)':s.pending.has(n.id)?'Pending. Click to refund.':canAlloc(n)?'Click to allocate':(s.locked?'Locked until the next map screen':'Not reachable yet');
+  h+='<p class="sm">'+state+' · '+n.cost+' point'+(n.cost===1?'':'s')+' from the start if nothing else is taken</p>';
+  let html='<div class="tip">'+h+'</div>';
+  kwsOf(f).forEach(k=>{
+    html+='<div class="tip kw'+(KWGAP.has(k)?' gap':'')+'"><h4>'+k+'</h4><p class="sm">'+KW[k]+'</p><p class="sm" style="opacity:.7">'+(KWGAP.has(k)?'Keyword gap: tooltip source not found yet (open decision 13).':'Stand-in text. The real tooltip reuses the game\'s own keyword text.')+'</p></div>';
+  });
+  tipwrap.innerHTML=html;tipwrap.style.display='flex';
+  const sr=svg.getBoundingClientRect(),gr=g.getBoundingClientRect();
+  const tw=tipwrap.offsetWidth,th=tipwrap.offsetHeight;
+  let x=gr.right-sr.left+12,y=gr.top-sr.top-10;
+  if(x+tw>sr.width-8)x=gr.left-sr.left-tw-12;
+  if(x<8)x=8;
+  if(y+th>sr.height-8)y=sr.height-th-8;
+  if(y<8)y=8;
+  tipwrap.style.left=x+'px';tipwrap.style.top=y+'px';
+  Object.values(nodeEls).forEach(e=>e.classList.remove('syn','anti','me'));
+  nodeEls[n.id].classList.add('me');
+  // the module you are pointing at lights up blue, like the "one complete module" in the reference
+  edgeEls.forEach(({e,p})=>p.classList.toggle('modhl',typeof n.mod==='number'&&e.slot===n.mod));
+  if(showSyn)TR.nodes.forEach(m=>{
+    if(m===n||m.kind==='socket')return;
+    if(ss.has(m.fx))nodeEls[m.id].classList.add('syn');
+    if(antiMap[n.fx]&&antiMap[n.fx].has(m.fx))nodeEls[m.id].classList.add('anti');
+  });
+}
+function hideTip(){
+  tipwrap.style.display='none';
+  Object.values(nodeEls).forEach(e=>e.classList.remove('syn','anti','me'));
+  edgeEls.forEach(({p})=>p.classList.remove('modhl'));
+}
+
+/* pan / zoom */
+let view={x:0,y:0,k:1};
+function applyView(){world.setAttribute('transform','translate('+view.x+' '+view.y+') scale('+view.k+')');}
+function fit(){
+  const r=svg.getBoundingClientRect();
+  let a=1e9,b=1e9,c=-1e9,d=-1e9;
+  TR.nodes.forEach(n=>{a=Math.min(a,n.x);b=Math.min(b,n.y);c=Math.max(c,n.x);d=Math.max(d,n.y);});
+  a-=90;b-=130;c+=90;d+=130;
+  const k=Math.min(r.width/(c-a),r.height/(d-b));
+  view.k=k;view.x=r.width/2-(a+c)/2*k;view.y=r.height/2-(b+d)/2*k;applyView();
+}
+function zoomAt(mx,my,f){
+  const k2=Math.max(0.2,Math.min(2.6,view.k*f));
+  view.x=mx-(mx-view.x)*k2/view.k;view.y=my-(my-view.y)*k2/view.k;view.k=k2;applyView();
+}
+svg.addEventListener('wheel',e=>{e.preventDefault();const r=svg.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,Math.exp(-e.deltaY*0.0015));hideTip();},{passive:false});
+let drag=null,spaceDown=false;
+let clip=null,pasting=false,ghostG=null;   // copy/paste: the copied group, whether a paste is armed, and its preview
+const msel=new Set();   // every selected node id in Edit mode (sel is the main one, the anchor for shift-click)
+const marquee=document.getElementById('marquee');
+// While a paste is armed, a left click anywhere (node, line or empty space) drops it there. Capture phase, so nothing underneath reacts.
+svg.addEventListener('pointerdown',e=>{
+  if(!pasting||e.button!==0||spaceDown)return;
+  e.stopPropagation();e.preventDefault();
+  const [x,y]=toWorld(e.clientX,e.clientY);placePaste(x,y,e.shiftKey);
+},true);
+svg.addEventListener('pointermove',e=>{if(pasting&&ghostG){const [x,y]=toWorld(e.clientX,e.clientY);moveGhost(x,y);}});
+// In Edit mode with the Select tool, dragging empty space draws a selection box. To pan there, hold Space or use the middle or right mouse button.
+svg.addEventListener('pointerdown',e=>{
+  if(e.target.closest('.node'))return;
+  const boxMode=mode==='edit'&&tool==='select'&&e.button===0&&!spaceDown;
+  if(mode==='edit'&&tool==='select'&&e.button===1)e.preventDefault();
+  drag={x:e.clientX,y:e.clientY,vx:view.x,vy:view.y,moved:false,box:boxMode,add:e.shiftKey};
+  if(!boxMode)svg.classList.add('panning');
+  svg.setPointerCapture(e.pointerId);
+});
+svg.addEventListener('contextmenu',e=>{if(mode==='edit')e.preventDefault();});
+svg.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>4)drag.moved=true;
+  if(drag.box){
+    if(!drag.moved)return;
+    const r=svg.getBoundingClientRect(),x0=Math.min(drag.x,e.clientX)-r.left,y0=Math.min(drag.y,e.clientY)-r.top,x1=Math.max(drag.x,e.clientX)-r.left,y1=Math.max(drag.y,e.clientY)-r.top;
+    Object.assign(marquee.style,{display:'block',left:x0+'px',top:y0+'px',width:(x1-x0)+'px',height:(y1-y0)+'px'});
+    return;
+  }
+  view.x=drag.vx+e.clientX-drag.x;view.y=drag.vy+e.clientY-drag.y;applyView();
+});
+const endDrag=()=>{drag=null;svg.classList.remove('panning');marquee.style.display='none';};
+svg.addEventListener('pointerup',e=>{
+  const d=drag;endDrag();
+  if(!d)return;
+  if(d.box&&d.moved){boxSelect(d.x,d.y,e.clientX,e.clientY,d.add);return;}
+  if(!d.moved&&mode==='edit')canvasClick(e);
+});
+svg.addEventListener('pointercancel',endDrag);
+document.addEventListener('keydown',e=>{if(e.key===' '&&!/INPUT|TEXTAREA|SELECT|BUTTON/.test((e.target&&e.target.tagName)||'')){spaceDown=true;if(mode==='edit')e.preventDefault();}});
+document.addEventListener('keyup',e=>{if(e.key===' ')spaceDown=false;});
+window.addEventListener('blur',()=>{spaceDown=false;});
+document.getElementById('zin').onclick=()=>{const r=svg.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1.25);};
+document.getElementById('zout').onclick=()=>{const r=svg.getBoundingClientRect();zoomAt(r.width/2,r.height/2,0.8);};
+document.getElementById('zfit').onclick=()=>fit();
+document.getElementById('q').addEventListener('input',applyQuery);
+
+/* top bar actions */
+function win(p,label){const s=S();s.earned+=p;s.locked=false;refresh();toast(label+': +'+p+' point'+(p>1?'s':'')+'. Back on the map, allocation is open.');}
+document.getElementById('w1').onclick=()=>win(1,'Normal fight won');
+document.getElementById('w2').onclick=()=>win(2,'Elite won');
+document.getElementById('w3').onclick=()=>win(3,'Boss won');
+document.getElementById('lock').onclick=()=>{
+  const s=S(),n=s.pending.size;
+  s.pending.forEach(id=>s.committed.add(id));s.pending.clear();s.locked=true;refresh();
+  toast(n?'Locked. '+n+' pending perk'+(n>1?'s are':' is')+' now committed. Win a fight to reopen the map.':'Locked with nothing pending. Win a fight to reopen the map.');
+};
+document.getElementById('refund').onclick=()=>{const s=S();const n=s.pending.size;s.pending.clear();refresh();hideTip();toast('Refunded '+n+' pending perk'+(n===1?'':'s')+'.');};
+document.getElementById('sheetBtn').onclick=()=>{renderSheet();document.getElementById('sheet').classList.add('open');};
+document.getElementById('sheet').addEventListener('click',e=>{if(e.target.id==='sheet'||e.target.id==='closeSheet')document.getElementById('sheet').classList.remove('open');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('sheet').classList.remove('open');});
+document.getElementById('devBtn').onclick=()=>{
+  const d=document.getElementById('drawer'),o=!d.classList.contains('open');
+  d.classList.toggle('open',o);document.getElementById('devBtn').setAttribute('aria-expanded',o);if(o)renderDrawer();
+};
+
+/* build sheet (read-only summary) */
+function renderSheet(){
+  const s=S();const rows={};
+  TR.nodes.forEach(n=>{
+    if(n.kind==='socket'||!allocated(n))return;
+    const r=rows[n.fx]||(rows[n.fx]={f:FX[n.fx],c:0,p:0});
+    if(s.committed.has(n.id))r.c++;else r.p++;
+  });
+  const list=Object.values(rows).sort((a,b)=>a.f.sc.localeCompare(b.f.sc)||a.f.name.localeCompare(b.f.name));
+  let h='<div style="display:flex;justify-content:space-between;gap:12px"><div><h2>Build sheet</h2><div class="pc">Name TBD. Read-only, available anywhere including combat. '+TR.C.name+'.</div></div><button id="closeSheet">Close</button></div>';
+  if(!list.length)h+='<p class="pc">No perks yet.</p>';
+  else{
+    h+='<table><thead><tr><th>Perk</th><th>Reach</th><th>Nodes</th><th>Total</th><th>Effect</th></tr></thead><tbody>';
+    list.forEach(r=>{
+      const n=r.c+r.p,f=r.f;
+      h+='<tr><td><b>'+f.name+'</b><br><span class="pill '+f.sc.toLowerCase()+'">'+SC[f.sc].n+'</span></td>'+
+        '<td>'+(f.sc==='X'?'All players':f.sc==='E'?'Through you':'You')+'</td>'+
+        '<td>'+n+(r.p?' <span class="pc">('+r.p+' pending)</span>':'')+'</td>'+
+        '<td>'+F(f,n,chancesOf(f.id),amountsOf(f.id))+(wasted(f,n,amountsOf(f.id))?'<br><span style="color:#ffcf6b">cap reached, extra wasted</span>':'')+'</td>'+
+        '<td>'+T(f,n,undefined,amountsOf(f.id))+'</td></tr>';
+    });
+    h+='</tbody></table>';
+  }
+  document.getElementById('sheetCard').innerHTML=h;
+}
+
+/* dev drawer */
+function perkNodes(){return TR.nodes.filter(n=>n.kind==='perk');}
+function validate(){
+  const out=[],pk=perkNodes();
+  out.push([TR.starts.length>0,TR.starts.length?'Start nodes: '+TR.starts.length+' (each one can be taken at any time)':'No start node: set at least one node to type Start']);
+  const reach=pk.filter(n=>n.cost<1e9).length;
+  out.push([reach===pk.length,'Every perk reachable from the start: '+reach+' of '+pk.length]);
+  const present=new Set(pk.map(n=>n.fx));
+  const general=Object.keys(FX).filter(i=>!NONGENERAL.has(i));
+  const missing=general.filter(i=>!present.has(i));
+  // Leaving a perk out is allowed, so these two lines only inform; they never turn red.
+  out.push([true,'General effects placed: '+(general.length-missing.length)+' of '+general.length+(missing.length?' (left out: '+missing.map(i=>FX[i].name).join(', ')+')':'')]);
+  const chOwn=CHAR_FX[TR.ck]||[],missC=chOwn.filter(i=>!present.has(i));
+  out.push([true,TR.C.name+' effects placed: '+(chOwn.length-missC.length)+' of '+chOwn.length+(missC.length?' (left out: '+missC.map(i=>FX[i].name).join(', ')+')':'')]);
+  const alien=pk.filter(n=>!allowedHere(FX[n.fx]));
+  out.push([true,'Perks from another character (allowed, but they may do nothing if '+TR.C.name+' cannot trigger them): '+(alien.length?alien.slice(0,6).map(n=>FX[n.fx].name+' at '+n.id).join(', ')+(alien.length>6?' +'+(alien.length-6)+' more':''):'none')]);
+  const over=[],multi=[];
+  Object.keys(FX).forEach(i=>{
+    const mine=pk.filter(n=>n.fx===i),c=mine.length,f=FX[i],tot=+(sumOf(f,c,mine.map(nodeAmount))).toFixed(4);
+    if(f.cap!=null&&tot>f.cap)over.push(f.name+' '+tot+'/'+f.cap);
+    if(f.kind==='flag'&&c>1)multi.push(f.name+' x'+c);
+  });
+  out.push([true,'Effects whose full tree total passes their cap (allowed: the extra is simply wasted): '+(over.join(', ')||'none')]);
+  const locked=Object.values(FX).filter(f=>lockedChance(f)&&(chanceOf(f)!==100||nodeOff100(f.id))).map(f=>f.name);
+  out.push([locked.length===0,'Perks the mod never rolls but that have a chance other than 100: '+(locked.join(', ')||'none')]);
+  out.push([multi.length===0,'On/off effects placed more than once: '+(multi.join(', ')||'none')]);
+  return out;
+}
+function renderDrawer(){
+  const d=document.getElementById('drawer');
+  const pk=perkNodes();
+  const keys=pk.filter(n=>FX[n.fx].tier==='key').sort((a,b)=>b.cost-a.cost);
+  const per={};pk.forEach(n=>{const k=n.tag||(n.mod==='ring'?'travel rings and spokes':'start');per[k]=(per[k]||0)+1;});
+  let h='<h2>Display</h2>'+
+   '<label><input type="checkbox" id="tl" '+(showLabels?'checked':'')+'> Show internal module names (the real UI shows none)</label>'+
+   '<label><input type="checkbox" id="ts" '+(showSyn?'checked':'')+'> Highlight pairings and conflicts on hover</label>'+
+   '<h2>Run</h2><div class="grp"><button id="full">Earn a full run (40)</button><button id="reset">Reset this tree</button></div>'+
+   '<h2>Validator</h2><ul style="list-style:none;padding:0">'+validate().map(([ok,t])=>'<li class="'+(ok?'ok':'bad')+'">'+(ok?'OK ':'CHECK ')+t+'</li>').join('')+'</ul>'+
+   '<h2>Capstone and keystone distance</h2><table><thead><tr><th>Keystone</th><th>Points from start</th></tr></thead><tbody>'+
+   keys.map(n=>'<tr><td>'+FX[n.fx].name+'</td><td>'+n.cost+(TARGETS[n.fx]?' <span class="meh">(target '+TARGETS[n.fx]+')</span>':'')+'</td></tr>').join('')+'</tbody></table>'+
+   '<h2>Perks per module</h2><table><tbody>'+Object.keys(per).map(k=>'<tr><td>'+k.replace(/_/g,' ')+'</td><td>'+per[k]+'</td></tr>').join('')+'<tr><td><b>Total</b></td><td><b>'+pk.length+'</b></td></tr></tbody></table>'+
+   '<p class="pc" style="font-size:12px">Perk counts and per-node numbers are placeholders. Balance is yours.</p>';
+  d.innerHTML=h;
+  document.getElementById('tl').onchange=e=>{showLabels=e.target.checked;document.getElementById('labels').classList.toggle('showlbl',showLabels);};
+  document.getElementById('ts').onchange=e=>{showSyn=e.target.checked;};
+  document.getElementById('full').onclick=()=>{S().earned=40;refresh();toast('Earned set to 40.');};
+  document.getElementById('reset').onclick=()=>{const s=S();s.committed=new Set();s.pending.clear();s.earned=12;s.locked=false;refresh();hideTip();};
+}
+
+/* legend */
+(function(){
+  const L=document.getElementById('legend');
+  const sw=inner=>'<svg width="24" height="24" viewBox="-12 -12 24 24">'+inner+'</svg>';
+  const st='fill="none" stroke="#c9ccd6" stroke-width="2"';
+  L.innerHTML=
+   '<div class="r">'+sw('<circle r="5" '+st+'/>')+'Minor perk</div>'+
+   '<div class="r">'+sw('<circle r="9" '+st+'/><circle r="4.5" '+st+'/>')+'Notable</div>'+
+   '<div class="r">'+sw('<rect x="-7" y="-7" width="14" height="14" transform="rotate(45)" '+st+'/>')+'Capstone</div>'+
+   '<div class="r">'+sw('<rect x="-5" y="-5" width="10" height="10" '+st+'/>')+'Free attachment socket</div>'+
+   '<div class="r">'+sw('<path d="M-9 0H9" stroke="#3b82f6" stroke-width="3"/>')+'One complete module (on hover)</div>'+
+   '<div class="r">'+sw('<path d="M0 -7L7 0L0 7L-7 0Z" fill="#ff5d5d"/>')+'Shared enemy modifier</div>'+
+   '<div class="r">'+sw('<path d="M0 -7L7 6L-7 6Z" fill="#f4a04a"/>')+'Enemies, through you</div>'+
+   '<div class="r">'+sw('<circle r="7" fill="none" stroke="#6ff2c8" stroke-width="3"/>')+'Pairs well (on hover)</div>'+
+   '<div class="r">'+sw('<circle r="7" fill="none" stroke="#ff5d5d" stroke-width="3" stroke-dasharray="3 4"/>')+'Works against (on hover)</div>'+
+   '<div class="r">'+sw('<circle r="7" fill="#4f9bd955" stroke="#fff" stroke-width="2.5" stroke-dasharray="4 3"/>')+'Pending, can be refunded</div>';
+})();
+
+/* ================= editor ================= */
+let mode='play',tool='select',sel=null,srcId=null,snapOn=true,autoLink=true,lastFx='start_block',lastColor='#c9ccd6',perkQ='';
+const hist={};
+const H=()=>hist[cur]||(hist[cur]={undo:[],redo:[]});
+const TYPES=['minor','notable','cap','socket','start'];
+const TYPENAME={minor:'Minor',notable:'Notable',cap:'Capstone',socket:'Socket',start:'Start'};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const ekey=(a,b)=>[a,b].sort().join('|');
+const findEdge=key=>layouts[cur].edges.find(e=>ekey(e.a,e.b)===key);
+const sn=v=>snapOn?Math.round(v/10)*10:Math.round(v*10)/10;
+function newId(L){let m=-1;L.nodes.forEach(n=>{const k=/^n(\d+)$/.exec(n.id);if(k)m=Math.max(m,+k[1]);});return 'n'+(m+1);}
+function afterEdit(){
+  queueSave(cur);delete st[cur];trees[cur]=compile(layouts[cur],cur);TR=trees[cur];stateFor(cur);
+  [...msel].forEach(i=>{if(!TR.byId[i])msel.delete(i);});
+  if(sel&&sel.type==='node'&&!TR.byId[sel.id])sel=msel.size?{type:'node',id:[...msel][0]}:null;
+  if(sel&&sel.type==='edge'&&!findEdge(sel.key))sel=null;
+  if(srcId&&!TR.byId[srcId])srcId=null;
+  hideTip();draw();renderInspector();updateEdBar();
+}
+function edit(fn){
+  const h=H(),before=JSON.stringify(layouts[cur]);
+  const res=fn(layouts[cur]);
+  h.undo.push(before);if(h.undo.length>80)h.undo.shift();h.redo=[];
+  if(res)layouts[cur]=res;
+  afterEdit();
+}
+function undo(){const h=H();if(!h.undo.length)return;h.redo.push(JSON.stringify(layouts[cur]));layouts[cur]=JSON.parse(h.undo.pop());afterEdit();}
+function redo(){const h=H();if(!h.redo.length)return;h.undo.push(JSON.stringify(layouts[cur]));layouts[cur]=JSON.parse(h.redo.pop());afterEdit();}
+const toWorld=(cx,cy)=>{const r=svg.getBoundingClientRect();return[(cx-r.left-view.x)/view.k,(cy-r.top-view.y)/view.k];};
+
+function addNodeAt(x,y){
+  const prev=sel&&sel.type==='node'?sel.id:null;let id2=null;
+  edit(L=>{
+    const id=newId(L);id2=id;
+    const ref=prev&&L.nodes.find(n=>n.id===prev);
+    L.nodes.push({id,x:sn(x),y:sn(y),type:'minor',fx:lastFx,color:ref&&ref.color?ref.color:lastColor,mod:null,tag:'custom'});
+    if(autoLink&&ref)L.edges.push({a:prev,b:id,arc:null,slot:null});
+  });
+  selectNode(id2);
+}
+function toggleEdge(a,b){
+  edit(L=>{
+    const k=ekey(a,b),i=L.edges.findIndex(e=>ekey(e.a,e.b)===k);
+    if(i>=0)L.edges.splice(i,1);else L.edges.push({a,b,arc:null,slot:null});
+  });
+}
+function deleteNode(id){edit(L=>{L.nodes=L.nodes.filter(n=>n.id!==id);L.edges=L.edges.filter(e=>e.a!==id&&e.b!==id);});sel=null;paintSel();renderInspector();}
+function deleteEdge(key){edit(L=>{L.edges=L.edges.filter(e=>ekey(e.a,e.b)!==key);});sel=null;paintSel();renderInspector();}
+function setNode(id,props){
+  edit(L=>{
+    const n=L.nodes.find(x=>x.id===id);Object.assign(n,props);
+  });
+}
+function selectNode(id){sel={type:'node',id};msel.clear();msel.add(id);paintSel();renderInspector();}
+
+/* ---- copy and paste ----
+   Copy keeps the selected nodes and every connection that runs between two of them (a line to something outside the selection is left behind).
+   Paste drops a copy at the cursor with fresh ids, in the same tree or in another character's: the copied group lives in the editor, not in a tree.
+   A pasted group is not linked to what is already there; use Connect afterwards. Perks that belong to another character are allowed (the checks list them). */
+const cloneJ=o=>JSON.parse(JSON.stringify(o));
+function copySelection(){
+  const L=layouts[cur],ids=new Set(msel);
+  if(!ids.size&&sel&&sel.type==='node')ids.add(sel.id);
+  const nodes=L.nodes.filter(n=>ids.has(n.id));
+  if(!nodes.length){toast('Nothing selected. Drag a box around some nodes first, then copy.');return;}
+  const edges=L.edges.filter(e=>ids.has(e.a)&&ids.has(e.b));
+  const xs=nodes.map(n=>n.x),ys=nodes.map(n=>n.y);
+  clip={nodes:cloneJ(nodes),edges:cloneJ(edges),cx:(Math.min(...xs)+Math.max(...xs))/2,cy:(Math.min(...ys)+Math.max(...ys))/2,from:cur};
+  try{localStorage.setItem('pt.clip',JSON.stringify(clip));}catch(e){}   // a convenience only: lets the copy survive a reload
+  updateCopyBtns();
+  toast('Copied '+nodes.length+' node'+(nodes.length===1?'':'s')+' and '+edges.length+' connection'+(edges.length===1?'':'s')+'. Press Ctrl+V, then click where it should go.');
+}
+function loadClip(){
+  try{
+    const c=JSON.parse(localStorage.getItem('pt.clip')||'null');
+    if(c&&Array.isArray(c.nodes)&&c.nodes.length&&Array.isArray(c.edges)&&isFinite(c.cx)&&isFinite(c.cy))clip=c;
+  }catch(e){}
+}
+function updateCopyBtns(){
+  const cb=document.getElementById('copyBtn'),pb=document.getElementById('pasteBtn');
+  if(!cb||!pb)return;
+  cb.disabled=!(msel.size||(sel&&sel.type==='node'));
+  pb.disabled=!clip;pb.classList.toggle('on',pasting);
+}
+function startPaste(){
+  if(!clip){toast('Nothing copied yet. Select some nodes and press Ctrl+C.');return;}
+  pasting=true;svg.classList.add('pasting');buildGhost();updateCopyBtns();
+  toast('Click where the group should go. Esc cancels; hold Shift to keep pasting.');
+}
+function cancelPaste(){
+  if(!pasting)return;
+  pasting=false;svg.classList.remove('pasting');
+  if(ghostG){ghostG.remove();ghostG=null;}
+  updateCopyBtns();
+}
+// the preview: simple shapes in the nodes' own colours, moved as one by the cursor
+function buildGhost(){
+  if(ghostG)ghostG.remove();
+  ghostG=el('g',{id:'ghost','pointer-events':'none',opacity:'0.6'},world);
+  const byId={};clip.nodes.forEach(n=>byId[n.id]=n);
+  clip.edges.forEach(e=>{if(byId[e.a]&&byId[e.b])el('path',{d:pathFor(byId[e.a],byId[e.b],e.arc),fill:'none',stroke:'#e3b341','stroke-width':3},ghostG);});
+  clip.nodes.forEach(n=>{
+    const col=n.color||'#c9ccd6',g=el('g',{transform:'translate('+n.x+' '+n.y+')'},ghostG);
+    if(n.type==='socket')el('circle',{r:5,fill:'none',stroke:'#c9ccd6','stroke-width':2},g);
+    else if(n.type==='cap')el('rect',{x:-14,y:-14,width:28,height:28,transform:'rotate(45)',fill:col,stroke:'#161616','stroke-width':2},g);
+    else el('circle',{r:n.type==='start'?17:n.type==='notable'?15:10,fill:col,stroke:'#161616','stroke-width':2},g);
+  });
+  ghostG.setAttribute('transform','translate(0 0)');
+  ghostG.dataset.dx='0';ghostG.dataset.dy='0';
+}
+// cursor in world units to the shift that puts the group's centre under it (snapped like everything else, so a group built on the grid stays on it)
+function pasteShift(x,y){return[sn(x-clip.cx),sn(y-clip.cy)];}
+function moveGhost(x,y){const [dx,dy]=pasteShift(x,y);ghostG.setAttribute('transform','translate('+dx+' '+dy+')');}
+function placePaste(x,y,keep){
+  if(!clip)return;
+  const [dx,dy]=pasteShift(x,y),r1=v=>Math.round(v*10)/10,map={};
+  edit(L=>{
+    let m=-1;L.nodes.forEach(n=>{const k=/^n(\d+)$/.exec(n.id);if(k)m=Math.max(m,+k[1]);});
+    clip.nodes.forEach(d=>{const id='n'+(++m);map[d.id]=id;const n=cloneJ(d);n.id=id;n.x=r1(d.x+dx);n.y=r1(d.y+dy);L.nodes.push(n);});
+    clip.edges.forEach(e=>{if(map[e.a]&&map[e.b]){const c=cloneJ(e);c.a=map[e.a];c.b=map[e.b];L.edges.push(c);}});
+  });
+  const ids=Object.values(map);
+  msel.clear();ids.forEach(i=>msel.add(i));sel={type:'node',id:ids[0]};
+  if(!keep)cancelPaste();
+  paintSel();renderInspector();updateCopyBtns();
+  const starts=clip.nodes.filter(n=>n.type==='start').length,foreign=clip.nodes.filter(n=>n.fx&&FX[n.fx]&&!allowedHere(FX[n.fx])).length;
+  toast('Pasted '+ids.length+' node'+(ids.length===1?'':'s')+'. One undo removes them.'+(starts?' '+starts+' start node'+(starts===1?'':'s')+' came along.':'')+(foreign?' '+foreign+' perk'+(foreign===1?' belongs':'s belong')+' to another character (allowed, listed in the checks).':''));
+}
+// box select: every node (sockets too) whose centre is inside the dragged rectangle; Shift adds to what is already selected
+function boxSelect(x0,y0,x1,y1,add){
+  const [ax,ay]=toWorld(Math.min(x0,x1),Math.min(y0,y1)),[bx,by]=toWorld(Math.max(x0,x1),Math.max(y0,y1));
+  const hit=TR.nodes.filter(n=>n.x>=ax&&n.x<=bx&&n.y>=ay&&n.y<=by).map(n=>n.id);
+  if(!add)msel.clear();
+  hit.forEach(i=>msel.add(i));
+  if(!msel.size){sel=null;srcId=null;}
+  else{
+    if(!(sel&&sel.type==='node'&&msel.has(sel.id)))sel={type:'node',id:[...msel][0]};
+  }
+  paintSel();renderInspector();
+  if(hit.length)toast(msel.size+' node'+(msel.size===1?'':'s')+' selected. Drag one to move them all.');
+}
+// shift-click: select the chain of connected nodes between the selected (anchor) node and the clicked one, along the shortest path
+function rangeSelect(fromId,toId){
+  const from=TR.byId[fromId],to=TR.byId[toId];if(!from||!to)return;
+  const prev=new Map([[from.id,null]]),q=[from];
+  while(q.length&&!prev.has(to.id)){const u=q.shift();u.raw.forEach(v=>{if(!prev.has(v.id)){prev.set(v.id,u.id);q.push(v);}});}
+  if(!prev.has(to.id)){toast('Those two nodes are not connected, so there is nothing between them.');return;}
+  msel.clear();
+  for(let i=to.id;i!==null;i=prev.get(i))msel.add(i);
+  paintSel();renderInspector();
+  toast(msel.size+' nodes selected between them.');
+}
+function deleteSelected(){
+  const ids=new Set(msel);if(!ids.size)return;
+  edit(L=>{L.nodes=L.nodes.filter(n=>!ids.has(n.id));L.edges=L.edges.filter(e=>!ids.has(e.a)&&!ids.has(e.b));});
+  sel=null;msel.clear();paintSel();renderInspector();
+}
+function paintSel(){
+  if(!sel||sel.type!=='node')msel.clear();
+  updateCopyBtns();
+  Object.keys(elById).forEach(id=>{
+    const g=elById[id];
+    g.classList.toggle('sel',mode==='edit'&&((!!sel&&sel.type==='node'&&sel.id===id)||msel.has(id)));
+    g.classList.toggle('src',mode==='edit'&&srcId===id);
+  });
+  edgeEls.forEach(({e,p})=>p.classList.toggle('esel',mode==='edit'&&!!sel&&sel.type==='edge'&&sel.key===e.id));
+}
+
+/* pointer handling for nodes, edges and the canvas */
+let nd=null;
+function wireEdit(g,n){
+  g.addEventListener('pointerdown',ev=>{
+    if(mode!=='edit'||ev.button!==0)return;
+    ev.stopPropagation();ev.preventDefault();
+    // dragging one of several selected nodes moves them all by the same amount; dragging an unselected one moves just that one
+    const group=msel.size>1&&msel.has(n.id)?[...msel].map(i=>TR.byId[i]).filter(Boolean).map(m=>({n:m,ox:m.x,oy:m.y})):null;
+    nd={id:n.id,sx:ev.clientX,sy:ev.clientY,ox:n.x,oy:n.y,moved:false,group,before:JSON.stringify(layouts[cur])};
+    window.addEventListener('pointermove',ndMove);window.addEventListener('pointerup',ndUp,{once:true});
+  });
+}
+function ndMove(ev){
+  if(!nd||tool!=='select')return;
+  if(!nd.moved&&Math.abs(ev.clientX-nd.sx)+Math.abs(ev.clientY-nd.sy)<5)return;
+  nd.moved=true;hideTip();
+  const n=TR.byId[nd.id];
+  const nx=sn(nd.ox+(ev.clientX-nd.sx)/view.k),ny=sn(nd.oy+(ev.clientY-nd.sy)/view.k),dx=nx-nd.ox,dy=ny-nd.oy;
+  const movers=nd.group||[{n,ox:nd.ox,oy:nd.oy}],moving=new Set(movers.map(m=>m.n));
+  movers.forEach(m=>{m.n.x=Math.round((m.ox+dx)*10)/10;m.n.y=Math.round((m.oy+dy)*10)/10;elById[m.n.id].setAttribute('transform','translate('+m.n.x+' '+m.n.y+')');});
+  edgeEls.forEach(({e,p,h})=>{if(moving.has(e.a)||moving.has(e.b)){e.d=pathFor(e.a,e.b,e.arc);p.setAttribute('d',e.d);h.setAttribute('d',e.d);}});
+}
+function ndUp(ev){
+  window.removeEventListener('pointermove',ndMove);
+  const d=nd;nd=null;if(!d)return;
+  const n=TR.byId[d.id];if(!n)return;
+  if(d.moved){
+    const h=H();h.undo.push(d.before);if(h.undo.length>80)h.undo.shift();h.redo=[];
+    (d.group||[{n}]).forEach(m=>{const ln=layouts[cur].nodes.find(x=>x.id===m.n.id);if(ln){ln.x=m.n.x;ln.y=m.n.y;}});
+    if(!d.group){sel={type:'node',id:d.id};msel.clear();msel.add(d.id);}
+    afterEdit();
+  }else nodeClick(n,ev);
+}
+function nodeClick(n,ev){
+  if(tool==='select'){
+    if(ev.shiftKey&&sel&&sel.type==='node'&&sel.id!==n.id)rangeSelect(sel.id,n.id);
+    else if(ev.ctrlKey||ev.metaKey){
+      if(msel.has(n.id)&&msel.size>1)msel.delete(n.id);else msel.add(n.id);
+      if(!(sel&&sel.type==='node'&&msel.has(sel.id)))sel={type:'node',id:[...msel][0]};
+      paintSel();renderInspector();
+    }else selectNode(n.id);
+  }else if(tool==='add'){selectNode(n.id);}
+  else if(tool==='connect'){
+    if(!srcId){srcId=n.id;selectNode(n.id);}
+    else if(srcId===n.id){srcId=null;paintSel();}
+    else{const a=srcId;srcId=n.id;toggleEdge(a,n.id);selectNode(n.id);}
+  }else if(tool==='delete')deleteNode(n.id);
+}
+function edgeClick(e){
+  if(tool==='delete'){deleteEdge(e.id);return;}
+  sel={type:'edge',key:e.id};paintSel();renderInspector();
+}
+function canvasClick(ev){
+  if(tool==='add'){const[x,y]=toWorld(ev.clientX,ev.clientY);addNodeAt(x,y);}
+  else{sel=null;srcId=null;msel.clear();paintSel();renderInspector();}
+}
+
+/* inspector */
+const inspector=document.getElementById('inspector');
+// another character's perk is allowed in this tree, but it is tagged in the list and noted in the checks, since it may do nothing here
+const allowedHere=f=>f.group==='general'||f.group==='vigor'||f.group===cur;   // is this perk meant for the tree being edited? Others are allowed (on purpose) but flagged
+function perkListHTML(q,curFx){
+  const s=q.trim().toLowerCase();
+  const list=Object.values(FX).filter(f=>!s||f.name.toLowerCase().includes(s)||f.id.includes(s.replace(/\s+/g,'_'))||T(f,1).toLowerCase().includes(s)).sort((a,b)=>a.name.localeCompare(b.name));
+  if(!list.length)return '<p class="pc" style="padding:8px">No perk matches.</p>';
+  return list.map(f=>'<button class="prow'+(f.id===curFx?' on':'')+'" data-fx="'+f.id+'"><b>'+esc(f.name)+'</b> <span class="chip '+f.sc.toLowerCase()+'">'+SC[f.sc].n+'</span>'+(allowedHere(f)?'':' <span class="chip k">'+esc(CHARS[f.group]?CHARS[f.group].name:f.group)+' perk</span>')+'<small>'+esc(T(f,1))+'</small></button>').join('');
+}
+function renderInspector(){
+  if(mode!=='edit'){inspector.innerHTML='';return;}
+  const L=layouts[cur];let h='';
+  if(sel&&sel.type==='node'&&msel.size>1){
+    const ids=[...msel],socks=ids.filter(i=>{const d=L.nodes.find(n=>n.id===i);return d&&d.type==='socket';}).length;
+    h='<h2>'+ids.length+' nodes selected</h2><p class="pc">'+(socks?socks+' of them are sockets. ':'')+'Drag any selected node to move them all together.</p>'+
+      '<div class="lab">Colour (all perk nodes)</div><div class="swatches">'+SWATCHES.map(c=>'<button class="sw" data-col="'+c+'" style="background:'+c+'" aria-label="Colour '+c+'"></button>').join('')+'</div>'+
+      '<p style="margin-top:14px"><button id="copySel">Copy</button> <button class="danger" id="delSel">Delete '+ids.length+' nodes</button> <button id="clearSel">Clear selection</button></p>'+
+      '<ul class="help"><li>Shift-click another node to select the chain between it and the first one you picked.</li><li>Drag on empty space for a selection box; hold Shift to add to the selection. Ctrl-click adds or removes one node.</li></ul>';
+  }else if(!sel){
+    const v=validate();
+    h='<h2>Perk tree editor</h2><p class="pc">Click a node to edit it.</p>'+
+      '<ul class="help"><li><b>Select (V)</b>: click a node to edit it, drag it to move it. Drag on empty space for a selection box (Shift adds); then dragging any selected node moves them all. Shift-click a second node to select the chain between it and the first. Ctrl-click adds or removes one. To pan here, hold Space or use the middle or right mouse button.</li>'+
+      '<li><b>Add node (A)</b>: click empty space. The new node links to the one you had selected, so you can chain them.</li>'+
+      '<li><b>Connect (C)</b>: click two nodes to link or unlink them. It keeps chaining from the last node.</li>'+
+      '<li><b>Delete (X)</b>: click a node or a line. Del also deletes the selection.</li>'+
+      '<li>Set a node to <b>Start</b> to make it an entry point. You can have as many as you like; each one can be taken at any time.</li>'+
+      '<li><b>Copy and paste</b>: select nodes (drag a box, or Ctrl+A for everything), Ctrl+C, then Ctrl+V and click where the copy should go. Their connections come with them. It works in any character, so switch tabs between copying and pasting. Esc cancels; Shift+click pastes again.</li>'+
+      '<li>Ctrl+Z undoes. With the repo folder open, every edit is saved to data/trees/ right away.</li></ul>'+
+      '<div class="lab">Checks</div><ul style="list-style:none;padding:0;margin:0;font-size:12px">'+v.map(([ok,t])=>'<li class="'+(ok?'ok':'bad')+'">'+(ok?'OK ':'CHECK ')+esc(t)+'</li>').join('')+'</ul>'+
+      '<p class="pc" style="font-size:12px">'+L.nodes.length+' nodes, '+L.edges.length+' connections.</p>';
+  }else if(sel.type==='edge'){
+    const e=findEdge(sel.key),a=L.nodes.find(n=>n.id===e.a),b=L.nodes.find(n=>n.id===e.b);
+    const nm=n=>n.type==='socket'?'Socket '+n.id:(FX[n.fx]?FX[n.fx].name:'Node')+' '+n.id;
+    h='<h2>Connection</h2><p>'+esc(nm(a))+'<br>to '+esc(nm(b))+'</p>'+
+      '<div class="lab">Shape</div><div class="seg"><button id="curveOff" class="'+(e.arc?'':'on')+'">Straight</button><button id="curveOn" class="'+(e.arc?'on':'')+'">Curved</button></div>'+
+      (e.arc?'<p><button id="flipCurve">Flip curve</button></p>':'')+
+      '<p><button class="danger" id="delEdge">Delete connection</button></p>';
+  }else{
+    const d=L.nodes.find(n=>n.id===sel.id);
+    if(!d){inspector.innerHTML='';return;}
+    const f=d.type==='socket'?null:FX[FX[d.fx]?d.fx:'start_block'];
+    h='<h2>Node <span class="id">'+d.id+'</span></h2>'+
+      '<div class="lab">Type</div><div class="seg wrap">'+TYPES.map(t=>'<button data-t="'+t+'" class="'+(d.type===t?'on':'')+'">'+TYPENAME[t]+'</button>').join('')+'</div>';
+    if(!f)h+='<p class="pc">Sockets cost no points. They join the nodes either side of them.</p>';
+    else{
+      h+='<div class="lab">Perk</div><div class="curperk"><b>'+esc(f.name)+'</b> <span class="chip '+f.sc.toLowerCase()+'">'+SC[f.sc].n+'</span><div>'+esc(T(f,1))+'</div></div>'+
+        '<input type="search" id="perkQ" placeholder="Search all '+Object.keys(FX).length+' perks" value="'+esc(perkQ)+'" aria-label="Search perks"><div id="perkList">'+perkListHTML(perkQ,f.id)+'</div>'+
+        '<div class="lab">Colour</div><div class="swatches">'+SWATCHES.map(c=>'<button class="sw'+(d.color===c?' on':'')+'" data-col="'+c+'" style="background:'+c+'" aria-label="Colour '+c+'"></button>').join('')+'</div>';
+    }
+    if(f){
+      h+='<div class="lab">Trigger chance</div>'+(lockedChance(f)&&d.chance==null?'<p class="pc">The mod never rolls this perk, so it always triggers.</p>':
+        '<div class="pos"><label>% <input type="number" id="pc" min="0.01" max="10000" step="any" placeholder="'+chanceOf(f)+'" value="'+(d.chance==null?'':d.chance)+'"></label></div><p class="pc">Empty uses the perk\'s own chance ('+chanceOf(f)+'%). Above 100 gives sure successes plus a roll for the rest. Each node rolls on its own.</p>');
+    }
+    if(f&&f.kind!=='flag'){
+      h+='<div class="lab">Amount</div><div class="pos"><label>'+esc(f.uw||'number')+' <input type="number" id="pa" step="any" placeholder="'+f.unit+'" value="'+(d.amount==null?'':d.amount)+'"></label></div><p class="pc">Empty uses the perk\'s own number ('+f.unit+(f.uw?' '+f.uw:'')+'). A number here is what this node gives each time it succeeds; totals add up the real amounts.</p>';
+    }
+    h+='<div class="lab">Position</div><div class="pos"><label>X <input type="number" id="px" step="10" value="'+d.x+'"></label><label>Y <input type="number" id="py" step="10" value="'+d.y+'"></label></div>';
+    const nb=L.edges.filter(e=>e.a===d.id||e.b===d.id).map(e=>({k:ekey(e.a,e.b),o:L.nodes.find(n=>n.id===(e.a===d.id?e.b:e.a))})).filter(x=>x.o);
+    h+='<div class="lab">Connections ('+nb.length+')</div>'+(nb.length?nb.map(x=>'<div class="conn"><span>'+esc(x.o.type==='socket'?'Socket':(FX[x.o.fx]?FX[x.o.fx].name:'Node'))+' <span class="id">'+x.o.id+'</span></span><button data-rm="'+x.k+'">Remove</button></div>').join(''):'<p class="pc">None. Use the Connect tool (C).</p>')+
+      '<p style="margin-top:14px"><button class="danger" id="delNode">Delete node</button></p>';
+  }
+  inspector.innerHTML=h;
+}
+inspector.addEventListener('click',ev=>{
+  const b=ev.target.closest('button');if(!b||mode!=='edit')return;
+  if(b.dataset.t&&sel)setNode(sel.id,{type:b.dataset.t});
+  else if(b.dataset.fx&&sel){lastFx=b.dataset.fx;setNode(sel.id,{fx:b.dataset.fx,chance:undefined,amount:undefined});}   // a node's own chance and amount were set for its old perk, so a new perk starts from its own defaults
+  else if(b.dataset.col&&sel&&msel.size>1){lastColor=b.dataset.col;const ids=new Set(msel);edit(L=>{L.nodes.forEach(n=>{if(ids.has(n.id)&&n.type!=='socket')n.color=b.dataset.col;});});}
+  else if(b.id==='copySel')copySelection();
+  else if(b.id==='delSel')deleteSelected();
+  else if(b.id==='clearSel'){sel=null;msel.clear();paintSel();renderInspector();}
+  else if(b.dataset.col&&sel){lastColor=b.dataset.col;setNode(sel.id,{color:b.dataset.col});}
+  else if(b.dataset.rm){toggleEdge(...b.dataset.rm.split('|'));}
+  else if(b.id==='delNode'&&sel)deleteNode(sel.id);
+  else if(b.id==='delEdge'&&sel)deleteEdge(sel.key);
+  else if((b.id==='curveOn'||b.id==='curveOff'||b.id==='flipCurve')&&sel){
+    edit(L=>{
+      const e=findEdge(sel.key);
+      if(b.id==='curveOff')e.arc=null;
+      else if(b.id==='flipCurve'&&e.arc)e.arc.sweep=e.arc.sweep?0:1;
+      else if(b.id==='curveOn'&&!e.arc){
+        const a=L.nodes.find(n=>n.id===e.a),c=L.nodes.find(n=>n.id===e.b),r=Math.round(Math.hypot(a.x-c.x,a.y-c.y)*0.75);
+        e.arc={rx:r,ry:r,rot:0,sweep:1};
+      }
+    });
+  }
+});
+inspector.addEventListener('input',ev=>{
+  if(ev.target.id==='perkQ'){
+    perkQ=ev.target.value;
+    const d=layouts[cur].nodes.find(n=>sel&&n.id===sel.id);
+    document.getElementById('perkList').innerHTML=perkListHTML(perkQ,d&&d.fx);
+  }
+});
+inspector.addEventListener('change',ev=>{
+  if(ev.target.id==='pc'&&sel){
+    const t=ev.target.value.trim(),v=t===''?undefined:parseFloat(t);
+    if(v!==undefined&&!(v>0&&v<=10000)){toast('A node chance is above 0 and at most 10000.');renderInspector();return;}
+    setNode(sel.id,{chance:v});return;
+  }
+  if(ev.target.id==='pa'&&sel){
+    const t=ev.target.value.trim(),v=t===''?undefined:parseFloat(t),f0=FX[(layouts[cur].nodes.find(n=>n.id===sel.id)||{}).fx];
+    if(v!==undefined&&!(isFinite(v)&&v!==0)){toast('A node amount is a number other than 0, or empty for the perk\'s own.');renderInspector();return;}
+    setNode(sel.id,{amount:(v===undefined||(f0&&v===f0.unit))?undefined:v});return;
+  }
+  if((ev.target.id==='px'||ev.target.id==='py')&&sel){
+    const x=+document.getElementById('px').value,y=+document.getElementById('py').value;
+    if(isFinite(x)&&isFinite(y))setNode(sel.id,{x,y});
+  }
+});
+
+/* toolbar */
+const svgToolClasses=['tool-select','tool-add','tool-connect','tool-delete'];
+function setTool(t){
+  tool=t;srcId=null;
+  svgToolClasses.forEach(c=>svg.classList.remove(c));svg.classList.add('tool-'+t);
+  paintSel();updateEdBar();
+}
+function updateEdBar(){
+  document.querySelectorAll('#edtools [data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===tool));
+  const h=hist[cur]||{undo:[],redo:[]};
+  document.getElementById('undoBtn').disabled=!h.undo.length;
+  document.getElementById('redoBtn').disabled=!h.redo.length;
+}
+document.querySelectorAll('#edtools [data-tool]').forEach(b=>b.onclick=()=>{setTool(b.dataset.tool);b.blur();});   // blur so Space afterwards pans instead of re-pressing the button
+document.getElementById('copyBtn').onclick=e=>{copySelection();e.currentTarget.blur();};
+document.getElementById('pasteBtn').onclick=e=>{if(pasting)cancelPaste();else startPaste();e.currentTarget.blur();};
+document.getElementById('undoBtn').onclick=undo;
+document.getElementById('redoBtn').onclick=redo;
+document.getElementById('snapChk').onchange=e=>{snapOn=e.target.checked;};
+document.getElementById('linkChk').onchange=e=>{autoLink=e.target.checked;};
+document.getElementById('resetLayout').onclick=()=>{edit(()=>build(cur));sel=null;paintSel();renderInspector();toast('Layout reset to the generated default. Undo brings your version back.');};
+function fmtLayout(L){
+  return '{\n"version":1,\n"nodes":[\n'+L.nodes.map(n=>JSON.stringify(n)).join(',\n')+'\n],\n"edges":[\n'+L.edges.map(e=>JSON.stringify(e)).join(',\n')+'\n]\n}';
+}
+document.getElementById('ioBtn').onclick=()=>{
+  document.getElementById('sheetCard').innerHTML=
+    '<div style="display:flex;justify-content:space-between;gap:12px"><div><h2>Import and export</h2><div class="pc">Layout for '+TR.C.name+'. Each node has an id, x, y, type (minor, notable, cap, socket, start) and a perk id. Edit the text and load it back, or paste a layout from somewhere else.</div></div><button id="closeSheet">Close</button></div>'+
+    '<textarea id="ioText" spellcheck="false"></textarea><div class="grp" style="margin-top:8px"><button id="ioCopy" class="primary">Copy</button><button id="ioLoad">Load from text</button><span id="ioMsg" class="pc"></span></div>';
+  document.getElementById('ioText').value=fmtLayout(layouts[cur]);
+  document.getElementById('sheet').classList.add('open');
+};
+document.getElementById('sheetCard').addEventListener('click',ev=>{
+  const msg=t=>{const m=document.getElementById('ioMsg');if(m)m.textContent=t;};
+  if(ev.target.id==='ioCopy'){
+    const ta=document.getElementById('ioText');
+    const fallback=()=>{ta.focus();ta.select();msg('Press Ctrl+C to copy.');};
+    try{navigator.clipboard.writeText(ta.value).then(()=>msg('Copied.'),fallback);}catch(e){fallback();}
+  }else if(ev.target.id==='ioLoad'){
+    let L=null;
+    try{L=sanitize(JSON.parse(document.getElementById('ioText').value));}catch(e){L=null;}
+    if(!L){msg('That is not a valid layout.');return;}
+    edit(()=>L);sel=null;paintSel();renderInspector();
+    document.getElementById('sheet').classList.remove('open');toast('Layout loaded.');
+  }
+});
+document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+function setMode(m){
+  cancelPaste();mode=m;document.body.classList.toggle('edit',m==='edit');document.body.classList.toggle('bal',m==='balance');svg.classList.toggle('editing',m==='edit');
+  if(m==='balance')renderBalance();
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  document.getElementById('drawer').classList.remove('open');document.getElementById('sheet').classList.remove('open');
+  sel=null;srcId=null;hideTip();
+  if(m==='play')stateFor(cur);
+  setTool('select');refresh();paintSel();renderInspector();
+}
+document.addEventListener('keydown',ev=>{
+  if(mode!=='edit')return;
+  const tg=ev.target&&ev.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA')return;
+  const k=ev.key.toLowerCase();
+  if((ev.ctrlKey||ev.metaKey)&&k==='z'){ev.preventDefault();if(ev.shiftKey)redo();else undo();return;}
+  if((ev.ctrlKey||ev.metaKey)&&k==='y'){ev.preventDefault();redo();return;}
+  if((ev.ctrlKey||ev.metaKey)&&k==='c'){ev.preventDefault();copySelection();return;}
+  if((ev.ctrlKey||ev.metaKey)&&k==='v'){ev.preventDefault();startPaste();return;}
+  if((ev.ctrlKey||ev.metaKey)&&k==='a'){ev.preventDefault();msel.clear();layouts[cur].nodes.forEach(n=>msel.add(n.id));sel=msel.size?{type:'node',id:[...msel][0]}:null;paintSel();renderInspector();return;}
+  if(ev.ctrlKey||ev.metaKey||ev.altKey)return;
+  if(k==='v')setTool('select');else if(k==='a')setTool('add');else if(k==='c')setTool('connect');else if(k==='x')setTool('delete');
+  else if(k==='delete'||k==='backspace'){if(msel.size>1)deleteSelected();else if(sel&&sel.type==='node')deleteNode(sel.id);else if(sel&&sel.type==='edge')deleteEdge(sel.key);}
+  else if(k==='escape'){if(pasting){cancelPaste();return;}sel=null;srcId=null;msel.clear();paintSel();renderInspector();}
+});
+
+/* character tabs and boot */
+function setChar(ck){
+  cancelPaste();cur=ck;TR=treeFor(ck);stateFor(ck);
+  document.querySelectorAll('#chars button').forEach(b=>b.setAttribute('aria-selected',b.dataset.ck===ck));
+  hideTip();sel=null;srcId=null;draw();fit();renderInspector();updateEdBar();
+}
+/* ================= balance tab: edit perk numbers and text ================= */
+const balance=document.getElementById('balance');
+let balQ='',balG='all';
+const sigOf=f=>JSON.stringify([f.name,f.sc,f.kind,f.unit,f.cap==null?null:f.cap,f.chance==null?100:f.chance,f.text,f.note||'',f.uw||'']);
+function textProblem(f){
+  const bad=(f.text.match(/\{(\w+)\}/g)||[]).map(t=>t.slice(1,-1)).filter(t=>!['v','u','m','x','d','h','c'].includes(t));
+  if(bad.length)return 'Unknown token {'+bad[0]+'}';
+  if(!isFinite(f.unit))return 'Per-node value is not a number';
+  return '';
+}
+function balRow(f){
+  const uses=TR?TR.nodes.filter(n=>n.kind==='perk'&&n.fx===f.id).length:0;
+  const mod=sigOf(f)!==sigOf(ORIGFX[f.id]);
+  const prob=textProblem(f),ms=modStatus(f);
+  let max=uses?F(f,uses,treeChances(f.id),treeAmounts(f.id)):'';
+  if(uses&&wasted(f,uses,treeAmounts(f.id)))max+=' (over cap)';
+  const opt=(v,l,c)=>'<option value="'+v+'"'+(v===c?' selected':'')+'>'+l+'</option>';
+  return '<tr data-row="'+f.id+'"'+(mod?' class="mod"':'')+'>'+
+   '<td><input data-id="'+f.id+'" data-f="name" value="'+esc(f.name)+'" aria-label="Name"><div class="pc">'+f.id+' · '+f.group+'</div></td>'+
+   '<td><select data-id="'+f.id+'" data-f="sc" aria-label="Scope">'+opt('S','Self',f.sc)+opt('E','Enemies, through you',f.sc)+opt('X','Shared enemy',f.sc)+'</select><select data-id="'+f.id+'" data-f="kind" aria-label="Kind">'+opt('add','Adds',f.kind)+(f.kind==='pct'?opt('pct','Chance (legacy)',f.kind):'')+opt('flag','On/off',f.kind)+'</select></td>'+
+   '<td><input data-id="'+f.id+'" data-f="unit" type="number" step="any" value="'+f.unit+'" class="num" aria-label="Per node"></td>'+
+   '<td><input data-id="'+f.id+'" data-f="chance" type="number" min="0.01" max="10000" step="any" value="'+(f.chance==null||f.chance===100?'':f.chance)+'" class="num" placeholder="100"'+((f.kind==='pct'||(lockedChance(f)&&chanceOf(f)===100))?' disabled title="'+(lockedChance(f)?'The mod never rolls this perk, so it is always 100%':'Chance perks already use the per-node value as their chance')+'"':'')+' aria-label="Trigger chance percent"></td>'+
+   '<td><input data-id="'+f.id+'" data-f="cap" type="number" step="any" value="'+(f.cap==null?'':f.cap)+'" class="num" placeholder="none" aria-label="Cap"></td>'+
+   '<td><input data-id="'+f.id+'" data-f="uw" value="'+esc(f.uw||'')+'" class="uw" aria-label="Unit label"></td>'+
+   '<td><input data-id="'+f.id+'" data-f="text" value="'+esc(f.text)+'" class="wide" aria-label="Text">'+(prob?'<div class="bad">'+esc(prob)+'</div>':'<div class="pc">'+esc(T(f,1))+'</div>')+'</td>'+
+   '<td><input data-id="'+f.id+'" data-f="note" value="'+esc(f.note||'')+'" class="wide" aria-label="Note"></td>'+
+   '<td class="pc">'+uses+(max?'<br>'+esc(max):'')+'</td>'+
+   '<td class="pc">'+(ms?'<span class="'+ms.cls+'">'+esc(ms.text)+'</span>':'')+'</td>'+
+   '<td>'+(mod?'<button data-rv="'+f.id+'">Revert</button>':'')+'</td></tr>';
+}
+function renderBalance(){
+  const groups=['all'].concat([...new Set(Object.values(FX).map(f=>f.group))]);
+  const q=balQ.toLowerCase();
+  const rows=Object.values(FX).filter(f=>(balG==='all'||f.group===balG)&&(!q||f.name.toLowerCase().includes(q)||f.id.includes(q.replace(/\s+/g,'_'))||f.text.toLowerCase().includes(q)));
+  const changed=Object.values(FX).filter(f=>sigOf(f)!==sigOf(ORIGFX[f.id])).length;
+  balance.innerHTML='<div class="balhead"><div><h2>Balance</h2><div class="pc">Edits save to data/perks.json. Text tokens: {v} total, {u} one perk, {c} trigger chance, {m} 1 + nodes, {x} base minus total, {d} double, {h} half. Leave Trigger chance empty for guaranteed (100). Above 100 gives sure successes plus a roll for the rest. '+changed+' changed since this folder was opened.</div></div>'+
+   '<div class="grp"><input type="search" id="balQ" placeholder="Search perks" value="'+esc(balQ)+'" aria-label="Search perks"><select id="balG" aria-label="Group">'+groups.map(g=>'<option value="'+g+'"'+(g===balG?' selected':'')+'>'+(g==='all'?'All groups':g)+'</option>').join('')+'</select></div></div>'+
+   '<div class="baltab"><table><thead><tr><th>Perk</th><th>Scope and kind</th><th>Per node</th><th>Trigger chance %</th><th>Cap</th><th>Unit label</th><th>Text</th><th>Note</th><th>In this tree</th><th>In game</th><th></th></tr></thead><tbody>'+rows.map(balRow).join('')+'</tbody></table></div>';
+}
+balance.addEventListener('input',ev=>{
+  if(ev.target.id==='balQ'){balQ=ev.target.value;const pos=ev.target.selectionStart;renderBalance();const i=document.getElementById('balQ');i.focus();i.setSelectionRange(pos,pos);}
+});
+balance.addEventListener('change',ev=>{
+  const t=ev.target;
+  if(t.id==='balG'){balG=t.value;renderBalance();return;}
+  const id=t.dataset.id,k=t.dataset.f;if(!id||!FX[id])return;
+  const f=FX[id];
+  if(k==='unit'){const v=parseFloat(t.value);if(!isFinite(v)){t.value=f.unit;return;}f.unit=v;}
+  else if(k==='cap'){const v=t.value.trim()===''?undefined:parseFloat(t.value);if(v!==undefined&&!isFinite(v)){t.value=f.cap==null?'':f.cap;return;}f.cap=v;}
+  else if(k==='chance'){const v=t.value.trim()===''?undefined:parseFloat(t.value);if(v!==undefined&&!(v>0&&v<=10000)){t.value=f.chance==null?'':f.chance;toast('Trigger chance is above 0 and at most 10000. Above 100 gives sure successes plus a roll.');return;}f.chance=(v===undefined||v===100)?undefined:v;}
+  else if(k==='uw')f.uw=t.value||undefined;
+  else if(k==='note')f.note=t.value||undefined;
+  else f[k]=t.value;
+  queueSave('perks');
+  const tr=balance.querySelector('tr[data-row="'+id+'"]');tr.outerHTML=balRow(f);
+  const head=balance.querySelector('.balhead .pc');if(head)head.innerHTML=head.innerHTML.replace(/\d+ changed/,Object.values(FX).filter(x=>sigOf(x)!==sigOf(ORIGFX[x.id])).length+' changed');
+});
+balance.addEventListener('click',ev=>{
+  const b=ev.target.closest('button[data-rv]');if(!b)return;
+  const id=b.dataset.rv;FX[id]=Object.assign({},ORIGFX[id]);queueSave('perks');renderBalance();
+});
+
+/* ================= disk: read and write the repo folder ================= */
+let dirH=null,saveT=null;const pendingSave=new Set();
+const statEl=document.getElementById('saveStat');
+function setStatus(txt,cls){statEl.textContent=txt;statEl.className='stat '+(cls||'');}
+const readHttp=async p=>{const r=await fetch('../'+p,{cache:'no-store'});if(!r.ok)throw new Error(p+' '+r.status);return r.text();};
+// When each file was last modified, as this tab last saw it (read at load or written by us). Saving checks it first, so a tab that
+// was opened before something else edited a file (another tab, Claude, git) cannot silently write its older picture over the top.
+const stamps={};
+const fileOf=async p=>{let d=dirH;const parts=p.split('/');for(const x of parts.slice(0,-1))d=await d.getDirectoryHandle(x);const fh=await d.getFileHandle(parts[parts.length-1]);return fh.getFile();};
+const readDir=async p=>{const f=await fileOf(p);stamps[p]=f.lastModified;return f.text();};
+async function changedOnDisk(p){try{const f=await fileOf(p);return f.lastModified>(stamps[p]||0);}catch(e){return false;}}
+async function writeDir(path,text){
+  let d=dirH;const parts=path.split('/');
+  for(const x of parts.slice(0,-1))d=await d.getDirectoryHandle(x,{create:true});
+  const fh=await d.getFileHandle(parts[parts.length-1],{create:true});
+  const w=await fh.createWritable();await w.write(text);await w.close();
+  try{stamps[path]=(await fh.getFile()).lastModified;}catch(e){}
+}
+// perks.json changed on disk since this tab read it: take the disk's version of every perk field you have NOT edited here, keep the fields you
+// did edit (compared with what the tab loaded), and pick up perks added outside. Returns how many perks changed because of it.
+async function syncPerksFromDisk(){
+  if(!(await changedOnDisk('data/perks.json')))return 0;
+  const f=await fileOf('data/perks.json'),D=JSON.parse(await f.text()),eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+  let n=0;const order=[];
+  D.perks.forEach(p=>{
+    order.push(p.id);const base=mkFx(p);
+    if(!FX[p.id]){FX[p.id]=base;ORIGFX[p.id]=Object.assign({},base);PERKRAW[p.id]=p;n++;return;}
+    const mine=FX[p.id],orig=ORIGFX[p.id];let touched=false;
+    Object.keys(base).forEach(k=>{if(eq(mine[k],orig[k])&&!eq(mine[k],base[k])){mine[k]=base[k];touched=true;}});
+    if(touched||!eq(PERKRAW[p.id],p))n++;
+    ORIGFX[p.id]=Object.assign({},base);PERKRAW[p.id]=p;
+  });
+  PERKORDER.forEach(id=>{if(!order.includes(id))order.push(id);});   // a perk only this tab has is kept
+  PERKORDER=order;
+  CHAR_FX={};NONGENERAL=new Set();
+  Object.values(FX).forEach(x=>{if(x.group!=='general'){NONGENERAL.add(x.id);if(CHARS[x.group])(CHAR_FX[x.group]=CHAR_FX[x.group]||[]).push(x.id);}});
+  stamps['data/perks.json']=f.lastModified;
+  return n;
+}
+async function loadAll(read){
+  const D={};
+  for(const k of ['perks','keywords','pairs','modules'])D[k]=JSON.parse(await read('data/'+k+'.json'));
+  try{D.support=JSON.parse(await read('data/mod-support.json'));}catch(e){D.support=null;}
+  D.treesRaw={};
+  for(const ck of Object.keys(D.modules.characters)){try{D.treesRaw[ck]=JSON.parse(await read('data/trees/'+ck+'.json'));}catch(e){D.treesRaw[ck]=null;}}
+  return D;
+}
+function setOrDel(o,k,v){if(v===undefined||v===null||v==='')delete o[k];else o[k]=v;}
+function fmtPerks(){
+  const L=PERKORDER.map(id=>{
+    const f=FX[id],r=Object.assign({},PERKRAW[id]);
+    r.name=f.name;r.scope=f.sc;r.kind=f.kind;r.unit=f.unit;r.text=f.text;
+    setOrDel(r,'cap',f.cap);setOrDel(r,'chance',f.chance==null||f.chance===100?undefined:f.chance);setOrDel(r,'unit_label',f.uw);setOrDel(r,'note',f.note);
+    return JSON.stringify(r);
+  });
+  return '{\n"version":1,\n"_help":'+JSON.stringify(PERKHELP)+',\n"perks":[\n'+L.join(',\n')+'\n]\n}\n';
+}
+let warnedNoSave=false;
+function queueSave(key){
+  if(!dirH){
+    setStatus('NOT SAVING. Open the repo folder or this edit is lost on reload.','bad');
+    if(!warnedNoSave){warnedNoSave=true;toast('Nothing is being saved: this editor has no folder open. Use "Open repo folder" (or Reopen) first, or your edits are lost when you reload.');}
+    return;
+  }
+  pendingSave.add(key);setStatus('Saving...','');
+  clearTimeout(saveT);saveT=setTimeout(flushSave,350);
+}
+window.addEventListener('beforeunload',e=>{if(warnedNoSave||pendingSave.size){e.preventDefault();e.returnValue='';}});
+async function flushSave(){
+  if(!dirH)return;
+  const keys=[...pendingSave];pendingSave.clear();
+  const blocked=[];let pulled=0;
+  try{
+    for(const k of keys){
+      if(k==='perks'){pulled+=await syncPerksFromDisk();await writeDir('data/perks.json',fmtPerks());}
+      else if(layouts[k]){
+        const p='data/trees/'+k+'.json';
+        // a tree changed outside this tab cannot be merged field by field, so refuse rather than overwrite it
+        if(await changedOnDisk(p)){blocked.push(k);continue;}
+        await writeDir(p,fmtLayout(layouts[k])+'\n');
+      }
+    }
+    if(blocked.length){
+      setStatus('NOT SAVED: '+blocked.map(k=>'data/trees/'+k+'.json').join(', ')+' changed on disk after this tab opened. Reload the editor, then redo that edit.','bad');
+      toast('Not saved: the '+blocked.join(', ')+' tree was changed outside this tab. Reload the editor (F5), then redo the edit.');
+    }else setStatus('Saved to disk '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),'ok');
+    if(pulled){
+      toast('Picked up '+pulled+' perk'+(pulled===1?'':'s')+' changed outside this tab (your own edits were kept).');
+      if(mode==='balance')renderBalance();else renderInspector();
+    }
+  }catch(e){keys.forEach(k=>pendingSave.add(k));setStatus('Save failed: '+e.message,'bad');}
+}
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open('perktree',1);r.onupgradeneeded=()=>r.result.createObjectStore('h');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function idbGet(k){try{const db=await idb();return await new Promise(res=>{const q=db.transaction('h').objectStore('h').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null);});}catch(e){return null;}}
+async function idbPut(k,v){try{const db=await idb();db.transaction('h','readwrite').objectStore('h').put(v,k);}catch(e){}}
+const startMsg=t=>{document.getElementById('startMsg').textContent=t;};
+function makeTabs(){
+  const nav=document.getElementById('chars');nav.innerHTML='';
+  Object.keys(CHARS).forEach(ck=>{
+    const b=document.createElement('button');b.dataset.ck=ck;b.setAttribute('role','tab');
+    b.innerHTML='<span class="dot" style="background:'+CHARS[ck].color+'"></span>'+esc(CHARS[ck].name);
+    b.onclick=()=>setChar(ck);nav.appendChild(b);
+  });
+}
+function start(D,handle){
+  initData(D);dirH=handle;
+  [trees,st,layouts,hist].forEach(o=>Object.keys(o).forEach(k=>delete o[k]));
+  const missing=[];
+  Object.keys(CHARS).forEach(ck=>{const L=D.treesRaw[ck]&&sanitize(D.treesRaw[ck]);if(L)layouts[ck]=L;else{layouts[ck]=build(ck);missing.push(ck);}});
+  makeTabs();
+  document.getElementById('start').classList.remove('open');
+  document.getElementById('openBtn').textContent=handle?'Change folder':'Open repo folder';
+  if(handle){warnedNoSave=false;setStatus('Connected to '+handle.name,'ok');missing.forEach(ck=>queueSave(ck));}
+  else setStatus('Read only. Open the repo folder to save to disk.','warn');
+  cur=null;setChar(Object.keys(CHARS)[0]);
+}
+async function openFolder(h){
+  try{
+    if(!h)h=await window.showDirectoryPicker({mode:'readwrite'});
+    dirH=h;
+    const D=await loadAll(readDir);
+    await idbPut('dir',h);start(D,h);
+  }catch(e){
+    dirH=null;
+    if(e&&e.name==='AbortError')return;
+    startMsg('Could not read that folder: '+(e&&e.message?e.message:e)+' Pick the repo root, the one that contains data/perks.json.');
+    document.getElementById('start').classList.add('open');
+  }
+}
+document.getElementById('openFolder').onclick=()=>{if(!window.showDirectoryPicker){startMsg('This browser cannot open folders. Use Chrome or Edge, or serve the repo with a local web server and open /editor/ for read-only use.');return;}openFolder(null);};
+document.getElementById('openBtn').onclick=()=>{if(!window.showDirectoryPicker){toast('This browser cannot open folders. Use Chrome or Edge.');return;}openFolder(null);};
+document.getElementById('reopenFolder').onclick=async()=>{
+  const h=await idbGet('dir');if(!h)return;
+  try{const p=await h.requestPermission({mode:'readwrite'});if(p==='granted')openFolder(h);else startMsg('Permission was not granted.');}catch(e){startMsg('Could not reopen: '+e.message);}
+};
+loadClip();
+(async function boot(){
+  const h=await idbGet('dir');
+  if(h){const b=document.getElementById('reopenFolder');b.textContent='Reopen "'+h.name+'"';b.style.display='';}
+  if(location.protocol==='http:'||location.protocol==='https:'){
+    try{const D=await loadAll(readHttp);start(D,null);return;}catch(e){startMsg('Could not load ../data/ over http: '+e.message);}
+  }
+  document.getElementById('start').classList.add('open');
+})();
+window.__perk={setChar,get:()=>({FX,TR,layouts,dirH,msel:[...msel],cur}),validate:()=>validate(),fmt:{F,T,V,wasted,luckFrom},openFolder,flushSave,queueSave,stamps};
+})();
+</script>
+</body>
+</html>
