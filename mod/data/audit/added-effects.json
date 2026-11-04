@@ -11,5 +11,22 @@
 {"id": "potion_poison", "name": "Hidden Dose", "note": "Added 2026-11-01 after the audit: using a potion applies Poison to all enemies."},
 {"id": "poison_apply_block", "name": "Toxic Ward", "note": "Added 2026-11-01 after the audit: applying Poison has a chance to give Block."},
 {"id": "poison_apply_damage", "name": "Poison Cloud", "note": "Added 2026-11-01 after the audit: applying Poison has a chance to deal damage to that enemy."},
-{"id": "damaged_block_chance", "name": "Swift Defense", "note": "Added 2026-11-01 after the audit: when you take damage, a chance to gain Block."}
+{"id": "damaged_block_chance", "name": "Swift Defense", "note": "Added 2026-11-01 after the audit: when you take damage, a chance to gain Block."},
+{"id": "turn_forge_chance", "name": "Bellows", "note": "Added 2026-11-01 after the audit: at the start of your turn, a chance to Forge."},
+{"id": "combat_forge_chance", "name": "Steel", "note": "Added 2026-11-01 after the audit: at the start of combat, a chance to Forge."},
+{"id": "forge_block_chance", "name": "Riposte", "note": "Added 2026-11-01 after the audit: when you Forge, a chance to gain Block."},
+{"id": "blade_attack_forge", "name": "Mastercraft", "note": "Added 2026-11-01 after the audit: playing Sovereign Blade Forges."},
+{"id": "first_turn_stars_chance", "name": "Aligned", "note": "Added 2026-11-02 after the audit: on your first turn, a chance to gain Stars."},
+{"id": "first_turn_energy_chance", "name": "Prepared", "note": "Added 2026-11-02 after the audit: on your first turn, a chance to gain Energy."},
+{"id": "turn_exhaust_chance", "name": "Clean", "note": "Added 2026-11-02 after the audit: at turn start, a chance to exhaust up to N cards from hand (your choice)."},
+{"id": "turn_discard_chance", "name": "Picky", "note": "Added 2026-11-02 after the audit: at turn start, a chance to discard up to N cards from hand (your choice)."},
+{"id": "free_attack_return_chance", "name": "Savage", "note": "Added 2026-11-02 after the audit: once per turn, a zero-cost Attack may return to hand."},
+{"id": "start_channel_lightning", "name": "Charged", "note": "Added 2026-11-02 after the audit: Preheated split: Lightning Orb at combat start."},
+{"id": "start_channel_frost", "name": "Chilled", "note": "Added 2026-11-02 after the audit: Preheated split: Frost Orb at combat start."},
+{"id": "start_channel_dark", "name": "Shadowed", "note": "Added 2026-11-02 after the audit: Preheated split: Dark Orb at combat start."},
+{"id": "start_channel_plasma", "name": "Ionized", "note": "Added 2026-11-02 after the audit: Preheated split: Plasma Orb at combat start."},
+{"id": "start_channel_glass", "name": "Glazed", "note": "Added 2026-11-02 after the audit: Preheated split: Glass Orb at combat start."},
+{"id": "orb_channel_focus", "name": "Prodigy", "note": "Added 2026-11-02 after the audit: channeling an Orb has a chance to give temporary Focus."},
+{"id": "orb_channel_block", "name": "Thoughtful", "note": "Added 2026-11-02 after the audit: channeling an Orb has a chance to give Block."},
+{"id": "turn_focus_chance", "name": "Attuned", "note": "Added 2026-11-02 after the audit: start of turn has a chance to give temporary Focus."}
 ]

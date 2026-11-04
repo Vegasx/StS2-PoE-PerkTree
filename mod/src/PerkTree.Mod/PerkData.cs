@@ -10,7 +10,7 @@ internal static class PerkData
     private static readonly Dictionary<string, TreeGraph?> Graphs = new(StringComparer.OrdinalIgnoreCase);
     private static EffectCatalog? _catalog;
 
-    private static string DataDir =>
+    internal static string DataDir =>
         Path.Combine(Path.GetDirectoryName(typeof(PerkData).Assembly.Location) ?? ".", "data");
 
     /// <summary>A fresh state for this player, or one restored from <paramref name="saved"/> when loading a run.</summary>

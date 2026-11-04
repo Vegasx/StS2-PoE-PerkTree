@@ -31,7 +31,9 @@ internal static class HandlerRegistry
         () => new KillGold(), () => new KillBlock(), () => new HitEnergyChance(),
         // potions
         () => new PotionBlock(), () => new PotionStrength(), () => new PotionDexterity(),
-        () => new PotionVulnerable(), () => new PotionWeak(), () => new PotionBuffer(), () => new PotionAcid(), () => new PotionFind(), () => new PotionRefund(), () => new PotionPoison(), () => new DamagedBlockChance(),
+        () => new PotionVulnerable(), () => new PotionWeak(), () => new PotionBuffer(), () => new PotionAcid(), () => new PotionFind(), () => new PotionRefund(), () => new PotionPoison(), () => new DamagedBlockChance(), () => new TurnForgeChance(), () => new CombatForgeChance(), () => new ForgeBlockChance(), () => new BladeAttackForge(),
+        () => new FirstTurnStarsChance(), () => new FirstTurnEnergyChance(), () => new TurnFocusChance(), () => new TurnExhaustChoice(), () => new TurnDiscardChoice(), () => new FreeAttackReturn(),
+        () => new StartChannelLightning(), () => new StartChannelFrost(), () => new StartChannelDark(), () => new StartChannelPlasma(), () => new StartChannelGlass(),
         // Vigor and gain amplification
         () => new VigorStrengthPct(), () => new VigorBlockPct(), () => new VigorEnergyPct(), () => new VigorRegenPct(),
         () => new VigorVulnerablePct(), () => new VigorWeakPct(), () => new VigorUnusedToBlock(),
@@ -46,7 +48,7 @@ internal static class HandlerRegistry
         () => new EnergyForHp(), () => new EnergyForMaxHp(), () => new ReplayGrant(), () => new EnemyStrip(), () => new GoldArmor(),
         // character mechanics: Shivs, Orbs, Osty, Stars and Forge
         () => new ShivDuplicateChance(), () => new ShivReturnChance(),
-        () => new OrbChannelChance(), () => new FocusWhenFull(), () => new StartChannelOrb(),
+        () => new OrbChannelChance(), () => new OrbChannelFocus(), () => new OrbChannelBlock(), () => new FocusWhenFull(), () => new StartChannelOrb(),
         () => new SummonBlock(), () => new SummonEachTurn(), () => new TurnSummonFromHpLost(), () => new TurnBlockFromSummonHp(),
         () => new StarEachTurn(), () => new ForgeStar(), () => new ForgeDrawChance(), () => new StarRefundChance(), () => new StarGainChance(),
         // added after the audit

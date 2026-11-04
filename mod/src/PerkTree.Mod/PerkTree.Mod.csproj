@@ -43,6 +43,9 @@
     <!-- The data the editor exports (node tools/export-mod.mjs from the repo root). PerkData loads effects.json and <character>.tree.json
          from the data/ folder next to the dll. The old hand-written samples stay in data/sample for the unit tests only. -->
     <None Include="..\..\data\runtime\*.json" LinkBase="data" CopyToOutputDirectory="PreserveNewest" />
+
+    <!-- Coin icons (art/perk-tokens-v1, png-128) and their rim-tint shader, loaded at runtime from icons/ next to the dll. -->
+    <None Include="..\..\assets\icons\*" LinkBase="icons" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -48,6 +48,9 @@ button:focus-visible,input:focus-visible,.node:focus-visible{outline:2px solid #
 .node{cursor:pointer;outline:none}
 .node .shape{fill:#161616;stroke:var(--c);stroke-opacity:.6;stroke-width:2}
 .node .inner{fill:none;stroke:var(--c);stroke-opacity:.6;stroke-width:2}
+.iconcell{white-space:nowrap}.iconcell select{min-width:120px}.iconcell img,.iconcell .noicon{vertical-align:middle;margin-right:4px}.iconcell .noicon{display:inline-block;width:24px;height:24px;border-radius:50%;background:#333;margin:2px 6px 2px 2px}
+.node .coin{pointer-events:none}
+.node .coinrim{fill:none;stroke:var(--c);pointer-events:none}
 .node .glyph{fill:var(--c);font-family:'DejaVu Sans',system-ui,sans-serif;text-anchor:middle;dominant-baseline:central;pointer-events:none;opacity:.8}
 .node.notable .glyph{font-size:0}
 .node.avail .shape,.node.avail .inner{stroke-opacity:1;stroke-width:3}
@@ -68,6 +71,11 @@ button:focus-visible,input:focus-visible,.node:focus-visible{outline:2px solid #
 .capt{fill:#d6d8e0;font:26px var(--body);text-anchor:middle;pointer-events:none;display:none}.capt.show{display:block}
 .lbl{fill:var(--mute);font:600 22px var(--disp);text-anchor:middle;letter-spacing:.06em;text-transform:uppercase;pointer-events:none;display:none}
 .showlbl .lbl{display:block}
+/* Edit mode: every label is visible and can be grabbed; the module names (internal) are dimmed so you can tell them from real captions */
+body.edit .lbl-el{display:block;pointer-events:all;cursor:move}
+body.edit .lbl.lbl-el{opacity:.6}
+.lbl-el.sel{fill:var(--accent)!important;paint-order:stroke;stroke:#161616;stroke-width:5px}
+#svg.tool-label{cursor:text}
 #tipwrap{position:absolute;display:none;z-index:5;pointer-events:none;flex-direction:column;gap:6px;max-width:330px}
 .tip{background:#10131c;border:1px solid #3a4260;border-radius:8px;padding:10px 12px;box-shadow:0 8px 24px #0009}
 .tip h3{margin:0 0 4px;font:600 17px var(--disp)}
@@ -199,6 +207,7 @@ body.bal #balance{display:block}
   <div class="grp editonly" id="edtools">
     <button data-tool="select" title="Select and move (V). Drag empty space for a selection box, Shift-click for a chain.">Select</button>
     <button data-tool="add" title="Place nodes (A)">Add node</button>
+    <button data-tool="label" title="Place text labels (T). Click a label to edit it, drag it to move it.">Label</button>
     <button data-tool="connect" title="Link nodes (C)">Connect</button>
     <button data-tool="delete" title="Delete (X)">Delete</button>
     <span class="sep"></span>
@@ -288,7 +297,7 @@ function checkModule(id,m){
   });
   if(!m.color||!m.tag)throw new Error('modules.json: '+id+' needs tag and color');
 }
-const mkFx=p=>({id:p.id,name:p.name,group:p.group||'general',sc:p.scope,kind:p.kind,unit:p.unit,text:p.text,uw:p.unit_label,cap:p.cap,base:p.base,tier:p.tier,note:p.note,mult:p.multiplier,chance:p.chance,keywords:p.keywords,percent:p.percent});
+const mkFx=p=>({id:p.id,name:p.name,group:p.group||'general',sc:p.scope,kind:p.kind,unit:p.unit,text:p.text,uw:p.unit_label,cap:p.cap,base:p.base,tier:p.tier,note:p.note,mult:p.multiplier,chance:p.chance,keywords:p.keywords,percent:p.percent,icon:p.icon});
 function initData(D){
   FX={};PERKORDER=[];PERKRAW={};ORIGFX={};PERKHELP=D.perks._help||'';
   D.perks.perks.forEach(p=>{
@@ -440,14 +449,24 @@ function build(ck){
   const TY={small:'minor',notable:'notable',cap:'cap',start:'start'};
   return{version:1,
     nodes:nodes.map(n=>({id:n.id,x:+n.x.toFixed(1),y:+n.y.toFixed(1),type:n.kind==='socket'?'socket':TY[n.tier],fx:n.kind==='socket'?null:n.fx,color:n.color||null,mod:n.mod===undefined?null:n.mod,tag:n.tag||null})),
-    edges:edges.map(e=>({a:e.a.id,b:e.b.id,arc:e.arc||null,slot:e.slot===undefined?null:e.slot}))};
+    edges:edges.map(e=>({a:e.a.id,b:e.b.id,arc:e.arc||null,slot:e.slot===undefined?null:e.slot})),
+    labels:defaultLabels(ck)};
+}
+// The text captions of a tree. They used to be drawn from code; now they are ordinary data in the layout (so they can be edited, moved and
+// deleted), and a tree file with no "labels" yet starts from these. "internal" ones are the module names: only shown with the Display toggle.
+function defaultLabels(ck){
+  const C=CHARS[ck],out=[];let n=0;
+  const add=(x,y,text,o)=>out.push(Object.assign({id:'l'+(n++),x:Math.round(x),y:Math.round(y),text},o||{}));
+  add(0,40,'Start');add(0,-RO-52,'Outer travel ring');add(0,-RI+34,'Inner travel ring');
+  (C&&C.slots||[]).forEach((id,s)=>{const a=-Math.PI/2+s*Math.PI/4,r=RO+88;add(Math.cos(a)*r,Math.sin(a)*r,id&&MODS[id]?MODS[id].tag.replace(/_/g,' '):'free socket',{internal:true,size:22});});
+  return out;
 }
 function pathFor(a,b,arc){
   const m='M'+a.x.toFixed(1)+' '+a.y.toFixed(1);
   if(!arc)return m+'L'+b.x.toFixed(1)+' '+b.y.toFixed(1);
   return m+'A'+arc.rx+' '+arc.ry+' '+arc.rot+' 0 '+arc.sweep+' '+b.x.toFixed(1)+' '+b.y.toFixed(1);
 }
-function sanitize(L){
+function sanitize(L,ck){
   if(!L||!Array.isArray(L.nodes)||!Array.isArray(L.edges))return null;
   const ids=new Set(),nodes=[];
   L.nodes.forEach(d=>{
@@ -463,7 +482,16 @@ function sanitize(L){
     const arc=e.arc&&isFinite(e.arc.rx)&&isFinite(e.arc.ry)?{rx:+e.arc.rx,ry:+e.arc.ry,rot:+e.arc.rot||0,sweep:e.arc.sweep?1:0}:null;
     edges.push({a:e.a,b:e.b,arc,slot:e.slot===undefined?null:e.slot});
   });
-  return{version:1,nodes,edges};
+  let labels;
+  if(Array.isArray(L.labels)){
+    const lids=new Set();labels=[];
+    L.labels.forEach(d=>{
+      if(!d||typeof d.id!=='string'||lids.has(d.id)||!isFinite(d.x)||!isFinite(d.y)||typeof d.text!=='string')return;
+      lids.add(d.id);
+      labels.push({id:d.id,x:+d.x,y:+d.y,text:d.text,size:(isFinite(d.size)&&d.size>=6&&d.size<=200)?+d.size:undefined,color:typeof d.color==='string'?d.color:undefined,internal:d.internal?true:undefined});
+    });
+  }else labels=ck&&CHARS[ck]?defaultLabels(ck):[];
+  return{version:1,nodes,edges,labels};
 }
 function compile(L,ck){
   const TI={minor:'small',notable:'notable',cap:'cap',start:'start'};
@@ -495,7 +523,7 @@ function compile(L,ck){
     }
   }
   nodes.forEach(n=>{n.cost=dist[n.i];});
-  return{ck,C:CHARS[ck],nodes,edges,hub,starts,byId,prev};
+  return{ck,C:CHARS[ck],nodes,edges,hub,starts,byId,prev,labels:(L.labels||[]).map(l=>Object.assign({},l))};
 }
 
 /* ================= state ================= */
@@ -539,9 +567,9 @@ const svg=document.getElementById('svg'),world=document.getElementById('world');
 const tipwrap=document.getElementById('tipwrap'),toastEl=document.getElementById('toast');
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
-let nodeEls={},edgeEls=[],sockEls=[],elById={};
+let nodeEls={},edgeEls=[],sockEls=[],elById={},lblEls={};
 function draw(){
-  world.innerHTML='';nodeEls={};edgeEls=[];sockEls=[];elById={};
+  world.innerHTML='';nodeEls={};edgeEls=[];sockEls=[];elById={};lblEls={};
   const gR=el('g',{},world),gE=el('g',{},world),gS=el('g',{},world),gN=el('g',{},world),gL=el('g',{id:'labels'},world);
   el('circle',{cx:0,cy:0,r:RI,fill:'none',stroke:'#2a2a2a','stroke-width':1},gR);
   TR.edges.forEach(e=>{
@@ -569,7 +597,13 @@ function draw(){
     }else if(n.tier==='start'){
       el('circle',{class:'halo',r:26},g);el('circle',{class:'shape',r:17},g);gs=18;
     }else{el('circle',{class:'halo',r:20},g);el('circle',{class:'shape',r:10},g);gs=11;}
-    const t=el('text',{class:'glyph','font-size':gs},g);t.textContent=n.tier==='start'?'★':glyph(n.fx);
+    const ic=iconOf(f),url=ic&&ICONURL[ic];
+    if(url){
+      // The game tints the coin rim with the node colour (branch_tint.gdshader); a ring in the node colour stands in for it here.
+      const r=n.tier==='cap'?20:n.tier==='start'?19:n.tier==='notable'?17:13;
+      el('image',{class:'coin',href:url,x:-r,y:-r,width:2*r,height:2*r},g);
+      el('circle',{class:'coinrim',r:(r*0.69).toFixed(1),'stroke-width':(r*0.09).toFixed(1)},g);
+    }else{const t=el('text',{class:'glyph','font-size':gs},g);t.textContent=n.tier==='start'?'★':glyph(n.fx);}
     const br=n.tier==='cap'?19:(n.tier==='notable'?13:9);
     if(f.sc==='X')el('path',{class:'badge',d:'M0 -6L6 0L0 6L-6 0Z',transform:'translate('+br+' '+(-br)+')',fill:'#ff5d5d',stroke:'#161616','stroke-width':1.5},g);
     if(f.sc==='E')el('path',{class:'badge',d:'M0 -6L6 5L-6 5Z',transform:'translate('+br+' '+(-br)+')',fill:'#f4a04a',stroke:'#161616','stroke-width':1.5},g);
@@ -582,11 +616,11 @@ function draw(){
     g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();if(mode==='edit')selectNode(n.id);else click(n);}});
     nodeEls[n.id]=g;elById[n.id]=g;wireEdit(g,n);
   });
-  const cap=(x,y,txt,cls)=>{const t=el('text',{x,y,class:cls||'capt'},gL);t.textContent=txt;return t;};
-  cap(0,40,'Start','capt show');cap(0,-RO-52,'Outer travel ring','capt show');cap(0,-RI+34,'Inner travel ring','capt show');
-  TR.C.slots.forEach((id,s)=>{
-    const a=-Math.PI/2+s*Math.PI/4,r=RO+88;
-    const t=cap(Math.cos(a)*r,Math.sin(a)*r,id?MODS[id].tag.replace(/_/g,' '):'free socket','lbl');
+  TR.labels.forEach(l=>{
+    const t=el('text',{x:l.x,y:l.y,class:'lbl-el '+(l.internal?'lbl':'capt show'),'data-lid':l.id},gL);
+    if(l.size)t.style.fontSize=l.size+'px';
+    if(l.color)t.style.fill=l.color;
+    t.textContent=l.text;lblEls[l.id]=t;wireLabel(t,l);
   });
   gL.classList.toggle('showlbl',showLabels);
   if(pasting)buildGhost();
@@ -917,6 +951,7 @@ function afterEdit(){
   [...msel].forEach(i=>{if(!TR.byId[i])msel.delete(i);});
   if(sel&&sel.type==='node'&&!TR.byId[sel.id])sel=msel.size?{type:'node',id:[...msel][0]}:null;
   if(sel&&sel.type==='edge'&&!findEdge(sel.key))sel=null;
+  if(sel&&sel.type==='label'&&!(layouts[cur].labels||[]).some(l=>l.id===sel.id))sel=null;
   if(srcId&&!TR.byId[srcId])srcId=null;
   hideTip();draw();renderInspector();updateEdBar();
 }
@@ -955,6 +990,54 @@ function setNode(id,props){
   });
 }
 function selectNode(id){sel={type:'node',id};msel.clear();msel.add(id);paintSel();renderInspector();}
+
+/* ---- text labels ----
+   Editor-only notes on the canvas: they live in the tree file under "labels" and the mod and exporter never read them. Place with the Label tool (T),
+   drag to move, change text / size / colour in the side panel, Del or the Delete tool removes one. All of it is undoable. */
+let ld=null;
+function setLabel(id,props){edit(L=>{const l=(L.labels||[]).find(x=>x.id===id);if(l)Object.assign(l,props);});}
+function selectLabel(id,focusText){
+  sel={type:'label',id};msel.clear();srcId=null;paintSel();renderInspector();
+  if(focusText){const t=document.getElementById('lt');if(t){t.focus();t.select();}}
+}
+function addLabelAt(x,y){
+  let id2=null;
+  edit(L=>{
+    L.labels=L.labels||[];let m=-1;L.labels.forEach(l=>{const k=/^l(\d+)$/.exec(l.id);if(k)m=Math.max(m,+k[1]);});
+    id2='l'+(m+1);L.labels.push({id:id2,x:sn(x),y:sn(y),text:'Label'});
+  });
+  selectLabel(id2,true);
+}
+function deleteLabel(id){
+  edit(L=>{L.labels=(L.labels||[]).filter(l=>l.id!==id);});
+  if(sel&&sel.type==='label'&&sel.id===id)sel=null;
+  paintSel();renderInspector();
+}
+function wireLabel(t,l){
+  t.addEventListener('pointerdown',ev=>{
+    if(mode!=='edit'||ev.button!==0||pasting)return;
+    ev.stopPropagation();ev.preventDefault();
+    if(tool==='delete'){deleteLabel(l.id);return;}
+    selectLabel(l.id,false);
+    ld={id:l.id,sx:ev.clientX,sy:ev.clientY,ox:l.x,oy:l.y,moved:false,before:JSON.stringify(layouts[cur])};
+    window.addEventListener('pointermove',ldMove);window.addEventListener('pointerup',ldUp,{once:true});
+  });
+  t.addEventListener('dblclick',()=>{if(mode==='edit'){const i=document.getElementById('lt');if(i){i.focus();i.select();}}});
+}
+function ldMove(ev){
+  if(!ld)return;
+  if(!ld.moved&&Math.abs(ev.clientX-ld.sx)+Math.abs(ev.clientY-ld.sy)<4)return;
+  ld.moved=true;hideTip();
+  ld.nx=sn(ld.ox+(ev.clientX-ld.sx)/view.k);ld.ny=sn(ld.oy+(ev.clientY-ld.sy)/view.k);
+  const t=lblEls[ld.id];if(t){t.setAttribute('x',ld.nx);t.setAttribute('y',ld.ny);}
+}
+function ldUp(){
+  window.removeEventListener('pointermove',ldMove);
+  const d=ld;ld=null;if(!d||!d.moved)return;
+  const h=H();h.undo.push(d.before);if(h.undo.length>80)h.undo.shift();h.redo=[];
+  const l=(layouts[cur].labels||[]).find(x=>x.id===d.id);if(l){l.x=d.nx;l.y=d.ny;}
+  afterEdit();
+}
 
 /* ---- copy and paste ----
    Copy keeps the selected nodes and every connection that runs between two of them (a line to something outside the selection is left behind).
@@ -1061,6 +1144,7 @@ function deleteSelected(){
 function paintSel(){
   if(!sel||sel.type!=='node')msel.clear();
   updateCopyBtns();
+  Object.keys(lblEls).forEach(id=>lblEls[id].classList.toggle('sel',mode==='edit'&&!!sel&&sel.type==='label'&&sel.id===id));
   Object.keys(elById).forEach(id=>{
     const g=elById[id];
     g.classList.toggle('sel',mode==='edit'&&((!!sel&&sel.type==='node'&&sel.id===id)||msel.has(id)));
@@ -1110,7 +1194,7 @@ function nodeClick(n,ev){
       if(!(sel&&sel.type==='node'&&msel.has(sel.id)))sel={type:'node',id:[...msel][0]};
       paintSel();renderInspector();
     }else selectNode(n.id);
-  }else if(tool==='add'){selectNode(n.id);}
+  }else if(tool==='add'||tool==='label'){selectNode(n.id);}
   else if(tool==='connect'){
     if(!srcId){srcId=n.id;selectNode(n.id);}
     else if(srcId===n.id){srcId=null;paintSel();}
@@ -1122,7 +1206,8 @@ function edgeClick(e){
   sel={type:'edge',key:e.id};paintSel();renderInspector();
 }
 function canvasClick(ev){
-  if(tool==='add'){const[x,y]=toWorld(ev.clientX,ev.clientY);addNodeAt(x,y);}
+  if(tool==='label'){const[x,y]=toWorld(ev.clientX,ev.clientY);addLabelAt(x,y);}
+  else if(tool==='add'){const[x,y]=toWorld(ev.clientX,ev.clientY);addNodeAt(x,y);}
   else{sel=null;srcId=null;msel.clear();paintSel();renderInspector();}
 }
 
@@ -1149,6 +1234,7 @@ function renderInspector(){
     const v=validate();
     h='<h2>Perk tree editor</h2><p class="pc">Click a node to edit it.</p>'+
       '<ul class="help"><li><b>Select (V)</b>: click a node to edit it, drag it to move it. Drag on empty space for a selection box (Shift adds); then dragging any selected node moves them all. Shift-click a second node to select the chain between it and the first. Ctrl-click adds or removes one. To pan here, hold Space or use the middle or right mouse button.</li>'+
+      '<li><b>Label (T)</b>: click empty space to add a text label. Click a label to edit its text, size and colour in this panel, drag it to move it, Del removes it.</li>'+
       '<li><b>Add node (A)</b>: click empty space. The new node links to the one you had selected, so you can chain them.</li>'+
       '<li><b>Connect (C)</b>: click two nodes to link or unlink them. It keeps chaining from the last node.</li>'+
       '<li><b>Delete (X)</b>: click a node or a line. Del also deletes the selection.</li>'+
@@ -1157,6 +1243,18 @@ function renderInspector(){
       '<li>Ctrl+Z undoes. With the repo folder open, every edit is saved to data/trees/ right away.</li></ul>'+
       '<div class="lab">Checks</div><ul style="list-style:none;padding:0;margin:0;font-size:12px">'+v.map(([ok,t])=>'<li class="'+(ok?'ok':'bad')+'">'+(ok?'OK ':'CHECK ')+esc(t)+'</li>').join('')+'</ul>'+
       '<p class="pc" style="font-size:12px">'+L.nodes.length+' nodes, '+L.edges.length+' connections.</p>';
+  }else if(sel.type==='label'){
+    const l=(L.labels||[]).find(x=>x.id===sel.id);
+    if(!l){inspector.innerHTML='';return;}
+    h='<h2>Label <span class="id">'+esc(l.id)+'</span></h2>'+
+      '<div class="lab">Text</div><input type="text" id="lt" value="'+esc(l.text)+'" aria-label="Label text">'+
+      '<div class="lab">Size</div><div class="pos"><label>px <input type="number" id="ls" min="6" max="200" step="1" placeholder="'+(l.internal?22:26)+'" value="'+(l.size==null?'':l.size)+'"></label></div>'+
+      '<div class="lab">Colour</div><div class="swatches">'+SWATCHES.map(c=>'<button class="sw'+(l.color===c?' on':'')+'" data-lcol="'+c+'" style="background:'+c+'" aria-label="Colour '+c+'"></button>').join('')+'</div>'+
+      '<p style="margin-top:8px"><button id="lcolClear">Default colour</button></p>'+
+      '<label class="chk" style="display:block;margin:10px 0"><input type="checkbox" id="li"'+(l.internal?' checked':'')+'> Internal note (only shown with "Show internal module names")</label>'+
+      '<div class="lab">Position</div><div class="pos"><label>X <input type="number" id="lx" step="10" value="'+l.x+'"></label><label>Y <input type="number" id="ly" step="10" value="'+l.y+'"></label></div>'+
+      '<p style="margin-top:14px"><button class="danger" id="delLabel">Delete label</button></p>'+
+      '<p class="pc">Labels are only for you: the mod never sees them. Press Enter or click away to apply a change.</p>';
   }else if(sel.type==='edge'){
     const e=findEdge(sel.key),a=L.nodes.find(n=>n.id===e.a),b=L.nodes.find(n=>n.id===e.b);
     const nm=n=>n.type==='socket'?'Socket '+n.id:(FX[n.fx]?FX[n.fx].name:'Node')+' '+n.id;
@@ -1192,6 +1290,11 @@ function renderInspector(){
 }
 inspector.addEventListener('click',ev=>{
   const b=ev.target.closest('button');if(!b||mode!=='edit')return;
+  if(sel&&sel.type==='label'){
+    if(b.dataset.lcol){setLabel(sel.id,{color:b.dataset.lcol});return;}
+    if(b.id==='lcolClear'){setLabel(sel.id,{color:undefined});return;}
+    if(b.id==='delLabel'){deleteLabel(sel.id);return;}
+  }
   if(b.dataset.t&&sel)setNode(sel.id,{type:b.dataset.t});
   else if(b.dataset.fx&&sel){lastFx=b.dataset.fx;setNode(sel.id,{fx:b.dataset.fx,chance:undefined,amount:undefined});}   // a node's own chance and amount were set for its old perk, so a new perk starts from its own defaults
   else if(b.dataset.col&&sel&&msel.size>1){lastColor=b.dataset.col;const ids=new Set(msel);edit(L=>{L.nodes.forEach(n=>{if(ids.has(n.id)&&n.type!=='socket')n.color=b.dataset.col;});});}
@@ -1222,6 +1325,13 @@ inspector.addEventListener('input',ev=>{
   }
 });
 inspector.addEventListener('change',ev=>{
+  if(sel&&sel.type==='label'){
+    const id=sel.id,t=ev.target;
+    if(t.id==='lt'){const v=t.value;if(!v.trim()){toast('A label needs some text. Use Delete to remove it.');renderInspector();return;}setLabel(id,{text:v});return;}
+    if(t.id==='ls'){const v=t.value.trim()===''?undefined:parseFloat(t.value);if(v!==undefined&&!(v>=6&&v<=200)){toast('Size is between 6 and 200.');renderInspector();return;}setLabel(id,{size:v});return;}
+    if(t.id==='li'){setLabel(id,{internal:t.checked?true:undefined});return;}
+    if(t.id==='lx'||t.id==='ly'){const x=+document.getElementById('lx').value,y=+document.getElementById('ly').value;if(isFinite(x)&&isFinite(y))setLabel(id,{x,y});return;}
+  }
   if(ev.target.id==='pc'&&sel){
     const t=ev.target.value.trim(),v=t===''?undefined:parseFloat(t);
     if(v!==undefined&&!(v>0&&v<=10000)){toast('A node chance is above 0 and at most 10000.');renderInspector();return;}
@@ -1239,7 +1349,7 @@ inspector.addEventListener('change',ev=>{
 });
 
 /* toolbar */
-const svgToolClasses=['tool-select','tool-add','tool-connect','tool-delete'];
+const svgToolClasses=['tool-select','tool-add','tool-label','tool-connect','tool-delete'];
 function setTool(t){
   tool=t;srcId=null;
   svgToolClasses.forEach(c=>svg.classList.remove(c));svg.classList.add('tool-'+t);
@@ -1260,7 +1370,7 @@ document.getElementById('snapChk').onchange=e=>{snapOn=e.target.checked;};
 document.getElementById('linkChk').onchange=e=>{autoLink=e.target.checked;};
 document.getElementById('resetLayout').onclick=()=>{edit(()=>build(cur));sel=null;paintSel();renderInspector();toast('Layout reset to the generated default. Undo brings your version back.');};
 function fmtLayout(L){
-  return '{\n"version":1,\n"nodes":[\n'+L.nodes.map(n=>JSON.stringify(n)).join(',\n')+'\n],\n"edges":[\n'+L.edges.map(e=>JSON.stringify(e)).join(',\n')+'\n]\n}';
+  return '{\n"version":1,\n"nodes":[\n'+L.nodes.map(n=>JSON.stringify(n)).join(',\n')+'\n],\n"edges":[\n'+L.edges.map(e=>JSON.stringify(e)).join(',\n')+'\n],\n"labels":[\n'+(L.labels||[]).map(l=>JSON.stringify(l)).join(',\n')+'\n]\n}';
 }
 document.getElementById('ioBtn').onclick=()=>{
   document.getElementById('sheetCard').innerHTML=
@@ -1277,7 +1387,7 @@ document.getElementById('sheetCard').addEventListener('click',ev=>{
     try{navigator.clipboard.writeText(ta.value).then(()=>msg('Copied.'),fallback);}catch(e){fallback();}
   }else if(ev.target.id==='ioLoad'){
     let L=null;
-    try{L=sanitize(JSON.parse(document.getElementById('ioText').value));}catch(e){L=null;}
+    try{L=sanitize(JSON.parse(document.getElementById('ioText').value),cur);}catch(e){L=null;}
     if(!L){msg('That is not a valid layout.');return;}
     edit(()=>L);sel=null;paintSel();renderInspector();
     document.getElementById('sheet').classList.remove('open');toast('Layout loaded.');
@@ -1303,8 +1413,8 @@ document.addEventListener('keydown',ev=>{
   if((ev.ctrlKey||ev.metaKey)&&k==='v'){ev.preventDefault();startPaste();return;}
   if((ev.ctrlKey||ev.metaKey)&&k==='a'){ev.preventDefault();msel.clear();layouts[cur].nodes.forEach(n=>msel.add(n.id));sel=msel.size?{type:'node',id:[...msel][0]}:null;paintSel();renderInspector();return;}
   if(ev.ctrlKey||ev.metaKey||ev.altKey)return;
-  if(k==='v')setTool('select');else if(k==='a')setTool('add');else if(k==='c')setTool('connect');else if(k==='x')setTool('delete');
-  else if(k==='delete'||k==='backspace'){if(msel.size>1)deleteSelected();else if(sel&&sel.type==='node')deleteNode(sel.id);else if(sel&&sel.type==='edge')deleteEdge(sel.key);}
+  if(k==='v')setTool('select');else if(k==='a')setTool('add');else if(k==='t')setTool('label');else if(k==='c')setTool('connect');else if(k==='x')setTool('delete');
+  else if(k==='delete'||k==='backspace'){if(msel.size>1)deleteSelected();else if(sel&&sel.type==='node')deleteNode(sel.id);else if(sel&&sel.type==='edge')deleteEdge(sel.key);else if(sel&&sel.type==='label')deleteLabel(sel.id);}
   else if(k==='escape'){if(pasting){cancelPaste();return;}sel=null;srcId=null;msel.clear();paintSel();renderInspector();}
 });
 
@@ -1317,12 +1427,20 @@ function setChar(ck){
 /* ================= balance tab: edit perk numbers and text ================= */
 const balance=document.getElementById('balance');
 let balQ='',balG='all';
-const sigOf=f=>JSON.stringify([f.name,f.sc,f.kind,f.unit,f.cap==null?null:f.cap,f.chance==null?100:f.chance,f.text,f.note||'',f.uw||'']);
+const sigOf=f=>JSON.stringify([f.name,f.sc,f.kind,f.unit,f.cap==null?null:f.cap,f.chance==null?100:f.chance,f.text,f.note||'',f.uw||'',f.icon||'']);
 function textProblem(f){
   const bad=(f.text.match(/\{(\w+)\}/g)||[]).map(t=>t.slice(1,-1)).filter(t=>!['v','u','m','x','d','h','c'].includes(t));
   if(bad.length)return 'Unknown token {'+bad[0]+'}';
   if(!isFinite(f.unit))return 'Per-node value is not a number';
   return '';
+}
+// Icon picker: "Auto" follows the rules in data/icons.json (shown in brackets); picking a name saves it as the perk's "icon".
+function iconCell(f){
+  const auto=iconOf(Object.assign({},f,{icon:undefined})),cur=f.icon&&ICONDATA.icons.includes(f.icon)?f.icon:'';
+  const shown=cur||auto,url=shown&&ICONURL[shown];
+  return (url?'<img src="'+url+'" alt="" width="28" height="28">':'<span class="noicon" title="No icon: a plain coloured disc in game"></span>')+
+   '<select data-id="'+f.id+'" data-f="icon" aria-label="Icon"><option value="">Auto ('+(auto||'none')+')</option>'+
+   ICONDATA.icons.map(n=>'<option value="'+n+'"'+(n===cur?' selected':'')+'>'+n.replace(/_/g,' ')+'</option>').join('')+'</select>';
 }
 function balRow(f){
   const uses=TR?TR.nodes.filter(n=>n.kind==='perk'&&n.fx===f.id).length:0;
@@ -1338,6 +1456,7 @@ function balRow(f){
    '<td><input data-id="'+f.id+'" data-f="chance" type="number" min="0.01" max="10000" step="any" value="'+(f.chance==null||f.chance===100?'':f.chance)+'" class="num" placeholder="100"'+((f.kind==='pct'||(lockedChance(f)&&chanceOf(f)===100))?' disabled title="'+(lockedChance(f)?'The mod never rolls this perk, so it is always 100%':'Chance perks already use the per-node value as their chance')+'"':'')+' aria-label="Trigger chance percent"></td>'+
    '<td><input data-id="'+f.id+'" data-f="cap" type="number" step="any" value="'+(f.cap==null?'':f.cap)+'" class="num" placeholder="none" aria-label="Cap"></td>'+
    '<td><input data-id="'+f.id+'" data-f="uw" value="'+esc(f.uw||'')+'" class="uw" aria-label="Unit label"></td>'+
+   '<td class="iconcell">'+iconCell(f)+'</td>'+
    '<td><input data-id="'+f.id+'" data-f="text" value="'+esc(f.text)+'" class="wide" aria-label="Text">'+(prob?'<div class="bad">'+esc(prob)+'</div>':'<div class="pc">'+esc(T(f,1))+'</div>')+'</td>'+
    '<td><input data-id="'+f.id+'" data-f="note" value="'+esc(f.note||'')+'" class="wide" aria-label="Note"></td>'+
    '<td class="pc">'+uses+(max?'<br>'+esc(max):'')+'</td>'+
@@ -1351,7 +1470,7 @@ function renderBalance(){
   const changed=Object.values(FX).filter(f=>sigOf(f)!==sigOf(ORIGFX[f.id])).length;
   balance.innerHTML='<div class="balhead"><div><h2>Balance</h2><div class="pc">Edits save to data/perks.json. Text tokens: {v} total, {u} one perk, {c} trigger chance, {m} 1 + nodes, {x} base minus total, {d} double, {h} half. Leave Trigger chance empty for guaranteed (100). Above 100 gives sure successes plus a roll for the rest. '+changed+' changed since this folder was opened.</div></div>'+
    '<div class="grp"><input type="search" id="balQ" placeholder="Search perks" value="'+esc(balQ)+'" aria-label="Search perks"><select id="balG" aria-label="Group">'+groups.map(g=>'<option value="'+g+'"'+(g===balG?' selected':'')+'>'+(g==='all'?'All groups':g)+'</option>').join('')+'</select></div></div>'+
-   '<div class="baltab"><table><thead><tr><th>Perk</th><th>Scope and kind</th><th>Per node</th><th>Trigger chance %</th><th>Cap</th><th>Unit label</th><th>Text</th><th>Note</th><th>In this tree</th><th>In game</th><th></th></tr></thead><tbody>'+rows.map(balRow).join('')+'</tbody></table></div>';
+   '<div class="baltab"><table><thead><tr><th>Perk</th><th>Scope and kind</th><th>Per node</th><th>Trigger chance %</th><th>Cap</th><th>Unit label</th><th>Icon</th><th>Text</th><th>Note</th><th>In this tree</th><th>In game</th><th></th></tr></thead><tbody>'+rows.map(balRow).join('')+'</tbody></table></div>';
 }
 balance.addEventListener('input',ev=>{
   if(ev.target.id==='balQ'){balQ=ev.target.value;const pos=ev.target.selectionStart;renderBalance();const i=document.getElementById('balQ');i.focus();i.setSelectionRange(pos,pos);}
@@ -1366,6 +1485,7 @@ balance.addEventListener('change',ev=>{
   else if(k==='chance'){const v=t.value.trim()===''?undefined:parseFloat(t.value);if(v!==undefined&&!(v>0&&v<=10000)){t.value=f.chance==null?'':f.chance;toast('Trigger chance is above 0 and at most 10000. Above 100 gives sure successes plus a roll.');return;}f.chance=(v===undefined||v===100)?undefined:v;}
   else if(k==='uw')f.uw=t.value||undefined;
   else if(k==='note')f.note=t.value||undefined;
+  else if(k==='icon'){f.icon=t.value||undefined;if(TR){draw();refresh();paintSel();}}   // the tree behind shows the new coin
   else f[k]=t.value;
   queueSave('perks');
   const tr=balance.querySelector('tr[data-row="'+id+'"]');tr.outerHTML=balRow(f);
@@ -1373,7 +1493,7 @@ balance.addEventListener('change',ev=>{
 });
 balance.addEventListener('click',ev=>{
   const b=ev.target.closest('button[data-rv]');if(!b)return;
-  const id=b.dataset.rv;FX[id]=Object.assign({},ORIGFX[id]);queueSave('perks');renderBalance();
+  const id=b.dataset.rv;FX[id]=Object.assign({},ORIGFX[id]);queueSave('perks');renderBalance();if(TR){draw();refresh();paintSel();}
 });
 
 /* ================= disk: read and write the repo folder ================= */
@@ -1415,8 +1535,29 @@ async function syncPerksFromDisk(){
   stamps['data/perks.json']=f.lastModified;
   return n;
 }
+/* ================= coin icons (the same ones the game shows) ================= */
+// data/icons.json lists the icon names and the guessing rules; tools/export-mod.mjs uses the same file, so editor and game agree.
+// The PNGs live in mod/assets/icons/<name>.png. Missing file or folder: nodes just keep their glyph.
+let ICONDATA={icons:[],rules:[]},ICONURL={};
+function iconOf(f){
+  if(!f)return null;
+  if(f.icon&&ICONDATA.icons.includes(f.icon))return f.icon;
+  const hay=(f.id+' '+(f.keywords||[]).join(' ')+' '+(f.uw||'')+' '+(f.name||'')).toLowerCase().replace(/start/g,'');
+  for(const [k,icon] of ICONDATA.rules)if(hay.includes(k))return icon;
+  return null;
+}
+async function loadIcons(fromDir){
+  Object.values(ICONURL).forEach(u=>{if(u.startsWith('blob:'))URL.revokeObjectURL(u);});ICONURL={};
+  for(const name of ICONDATA.icons){
+    try{
+      if(fromDir){const f=await fileOf('mod/assets/icons/'+name+'.png');ICONURL[name]=URL.createObjectURL(f);}
+      else ICONURL[name]='../mod/assets/icons/'+name+'.png';
+    }catch(e){}
+  }
+}
 async function loadAll(read){
   const D={};
+  try{ICONDATA=JSON.parse(await read('data/icons.json'));}catch(e){ICONDATA={icons:[],rules:[]};}
   for(const k of ['perks','keywords','pairs','modules'])D[k]=JSON.parse(await read('data/'+k+'.json'));
   try{D.support=JSON.parse(await read('data/mod-support.json'));}catch(e){D.support=null;}
   D.treesRaw={};
@@ -1428,7 +1569,7 @@ function fmtPerks(){
   const L=PERKORDER.map(id=>{
     const f=FX[id],r=Object.assign({},PERKRAW[id]);
     r.name=f.name;r.scope=f.sc;r.kind=f.kind;r.unit=f.unit;r.text=f.text;
-    setOrDel(r,'cap',f.cap);setOrDel(r,'chance',f.chance==null||f.chance===100?undefined:f.chance);setOrDel(r,'unit_label',f.uw);setOrDel(r,'note',f.note);
+    setOrDel(r,'cap',f.cap);setOrDel(r,'chance',f.chance==null||f.chance===100?undefined:f.chance);setOrDel(r,'unit_label',f.uw);setOrDel(r,'note',f.note);setOrDel(r,'icon',f.icon);
     return JSON.stringify(r);
   });
   return '{\n"version":1,\n"_help":'+JSON.stringify(PERKHELP)+',\n"perks":[\n'+L.join(',\n')+'\n]\n}\n';
@@ -1484,7 +1625,7 @@ function start(D,handle){
   initData(D);dirH=handle;
   [trees,st,layouts,hist].forEach(o=>Object.keys(o).forEach(k=>delete o[k]));
   const missing=[];
-  Object.keys(CHARS).forEach(ck=>{const L=D.treesRaw[ck]&&sanitize(D.treesRaw[ck]);if(L)layouts[ck]=L;else{layouts[ck]=build(ck);missing.push(ck);}});
+  Object.keys(CHARS).forEach(ck=>{const L=D.treesRaw[ck]&&sanitize(D.treesRaw[ck],ck);if(L)layouts[ck]=L;else{layouts[ck]=build(ck);missing.push(ck);}});
   makeTabs();
   document.getElementById('start').classList.remove('open');
   document.getElementById('openBtn').textContent=handle?'Change folder':'Open repo folder';
@@ -1496,7 +1637,7 @@ async function openFolder(h){
   try{
     if(!h)h=await window.showDirectoryPicker({mode:'readwrite'});
     dirH=h;
-    const D=await loadAll(readDir);
+    const D=await loadAll(readDir);await loadIcons(true);
     await idbPut('dir',h);start(D,h);
   }catch(e){
     dirH=null;
@@ -1516,7 +1657,7 @@ loadClip();
   const h=await idbGet('dir');
   if(h){const b=document.getElementById('reopenFolder');b.textContent='Reopen "'+h.name+'"';b.style.display='';}
   if(location.protocol==='http:'||location.protocol==='https:'){
-    try{const D=await loadAll(readHttp);start(D,null);return;}catch(e){startMsg('Could not load ../data/ over http: '+e.message);}
+    try{const D=await loadAll(readHttp);await loadIcons(false);start(D,null);return;}catch(e){startMsg('Could not load ../data/ over http: '+e.message);}
   }
   document.getElementById('start').classList.add('open');
 })();

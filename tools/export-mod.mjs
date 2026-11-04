@@ -56,6 +56,47 @@ const effects = perksFile.perks.map(p => {
 // ---- magnitude of one node of a perk, in the mod's units: the amount it gives each time it succeeds (the chance is separate)
 function magnitude(p) { return round(p.percent ? p.unit / 100 : p.unit); }
 
+// SVG arc (large-arc 0, as the editor draws them) from a to b, flattened to points. Standard endpoint-to-centre conversion
+// (SVG spec, appendix F.6), with the radii scaled up when they are too small to reach, as browsers do.
+function arcPoints(a, b, arc) {
+  let rx = Math.abs(+arc.rx), ry = Math.abs(+arc.ry);
+  const phi = (+arc.rot || 0) * Math.PI / 180, fs = arc.sweep ? 1 : 0, fa = 0;
+  const cos = Math.cos(phi), sin = Math.sin(phi);
+  const dx = (a.x - b.x) / 2, dy = (a.y - b.y) / 2;
+  const x1 = cos * dx + sin * dy, y1 = -sin * dx + cos * dy;
+  if (!rx || !ry) return [[a.x, a.y], [b.x, b.y]];
+  const lam = x1 * x1 / (rx * rx) + y1 * y1 / (ry * ry);
+  if (lam > 1) { rx *= Math.sqrt(lam); ry *= Math.sqrt(lam); }
+  let num = rx * rx * ry * ry - rx * rx * y1 * y1 - ry * ry * x1 * x1;
+  const den = rx * rx * y1 * y1 + ry * ry * x1 * x1;
+  let co = Math.sqrt(Math.max(0, num / den)) * (fa === fs ? -1 : 1);
+  const cx1 = co * rx * y1 / ry, cy1 = -co * ry * x1 / rx;
+  const cx = cos * cx1 - sin * cy1 + (a.x + b.x) / 2, cy = sin * cx1 + cos * cy1 + (a.y + b.y) / 2;
+  const ang = (ux, uy, vx, vy) => Math.atan2(ux * vy - uy * vx, ux * vx + uy * vy);
+  const t1 = ang(1, 0, (x1 - cx1) / rx, (y1 - cy1) / ry);
+  let dt = ang((x1 - cx1) / rx, (y1 - cy1) / ry, (-x1 - cx1) / rx, (-y1 - cy1) / ry);
+  if (!fs && dt > 0) dt -= 2 * Math.PI; else if (fs && dt < 0) dt += 2 * Math.PI;
+  const steps = Math.max(4, Math.ceil(Math.abs(dt) / (Math.PI / 24)));
+  const pts = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = t1 + dt * i / steps, ex = rx * Math.cos(t), ey = ry * Math.sin(t);
+    pts.push([Math.round((cos * ex - sin * ey + cx) * 10) / 10, Math.round((sin * ex + cos * ey + cy) * 10) / 10]);
+  }
+  return pts;
+}
+
+// Coin icon for a perk: its own "icon" in perks.json (set in the editor's Balance tab), otherwise guessed from the rules in
+// data/icons.json, which the editor reads too so both always agree. No match means no icon (a plain coloured disc).
+const ICONDATA = load('data/icons.json');
+const ICONS = ICONDATA.icons;
+function iconOf(p) {
+  if (p.icon && ICONS.includes(p.icon)) return p.icon;
+  // 'start' would otherwise match 'star'
+  const hay = (p.id + ' ' + (p.keywords || []).join(' ') + ' ' + (p.unit_label || '') + ' ' + (p.name || '')).toLowerCase().replace(/start/g, '');
+  for (const [k, icon] of ICONDATA.rules) if (hay.includes(k)) return icon;
+  return null;
+}
+
 // ---- trees
 const summary = [];
 mkdirSync(outDir, {recursive: true});
@@ -95,6 +136,7 @@ for (const ck of Object.keys(chars)) {
     }
     if (!mag) err(`${file}: ${n.id} has magnitude 0 (${p.id})`);
     const node = {id: n.id, branch: branchOf(n), tier: TIER[n.type] || 'small', effectId: p.id, magnitude: mag, x: Math.round(n.x), y: Math.round(n.y)};
+    if (typeof n.color === 'string') node.color = n.color;   // editor colour, used by the in-game tree
     // optional per-node chance (percent in the editor), only written when it differs from the perk's own
     if (n.chance != null && n.chance !== chanceOf(p)) {
       if (!(n.chance > 0 && n.chance <= 10000)) err(`${file}: ${n.id} has chance ${n.chance}%, which must be above 0 and at most 10000`);
@@ -111,12 +153,26 @@ for (const ck of Object.keys(chars)) {
   while (q.length) for (const m of adj.get(q.shift()) || []) if (!seen.has(m)) { seen.add(m); q.push(m); }
   const lost = nodes.filter(n => !seen.has(n.id));
   if (lost.length) err(`${file}: ${lost.length} node(s) cannot be reached from the start, e.g. ${lost.slice(0, 3).map(n => n.id).join(', ')}`);
+  // Display-only extras for the in-game tree: the editor's sockets (free joints the mod's graph skips) and every drawn line,
+  // arcs flattened to points, so the game draws the same picture as the editor. The mod's rules never read these.
+  const sockets = L.nodes.filter(n => n.type === 'socket').map(n => ({id: n.id, x: Math.round(n.x), y: Math.round(n.y)}));
+  const lines = L.edges.filter(e => byId.has(e.a) && byId.has(e.b) && e.a !== e.b).map(e => {
+    const a = byId.get(e.a), b = byId.get(e.b);
+    const line = {a: e.a, b: e.b};
+    if (e.arc && Number.isFinite(+e.arc.rx) && Number.isFinite(+e.arc.ry)) line.pts = arcPoints(a, b, e.arc);
+    return line;
+  });
   const tree = {schemaVersion: 2, characterId: ck, starts, branches: [...branches.values()], nodes, edges};
-  const dump = '{\n"schemaVersion":2,\n"characterId":' + JSON.stringify(ck) + ',\n"starts":' + JSON.stringify(starts) + ',\n"branches":[\n' + tree.branches.map(b => JSON.stringify(b)).join(',\n') + '\n],\n"nodes":[\n' + nodes.map(n => JSON.stringify(n)).join(',\n') + '\n],\n"edges":[\n' + edges.map(e => JSON.stringify(e)).join(',\n') + '\n]\n}\n';
+  const dump = '{\n"schemaVersion":2,\n"characterId":' + JSON.stringify(ck) + ',\n"starts":' + JSON.stringify(starts) + ',\n"branches":[\n' + tree.branches.map(b => JSON.stringify(b)).join(',\n') + '\n],\n"nodes":[\n' + nodes.map(n => JSON.stringify(n)).join(',\n') + '\n],\n"edges":[\n' + edges.map(e => JSON.stringify(e)).join(',\n') + '\n],\n"sockets":' + JSON.stringify(sockets) + ',\n"lines":[\n' + lines.map(l => JSON.stringify(l)).join(',\n') + '\n]\n}\n';
   if (!errors.length) writeFileSync(join(outDir, `${ck}.tree.json`), dump);
   summary.push(`${ck.padEnd(12)} ${String(nodes.length).padStart(3)} nodes, ${String(edges.length).padStart(3)} edges, ${tree.branches.length} branches`);
 }
 if (!errors.length) {
+  // Display text for the in-game tree (name, description template, unit label, default chance %). Kept out of effects.json
+  // so the mod's validated catalog stays mechanics-only; the UI reads this file and shows the id when an entry is missing.
+  const text = {};
+  for (const p of perksFile.perks) text[p.id] = {name: p.name || p.id, text: p.text || '', unit: p.unit_label || '', chance: p.chance ?? 100, percent: !!p.percent, icon: iconOf(p)};
+  writeFileSync(join(outDir, 'text.json'), JSON.stringify(text, null, 0) + '\n');
   writeFileSync(join(outDir, 'effects.json'), '{\n"schemaVersion":2,\n"effects":[\n' + effects.map(e => JSON.stringify(e)).join(',\n') + '\n]\n}\n');
 }
 

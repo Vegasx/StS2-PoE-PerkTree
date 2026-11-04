@@ -48,7 +48,10 @@ internal sealed class DoomExtra : EffectHandler
     }
 }
 
-/// <summary>Focused (Defect): the first time you gain Focus each combat, from any source, gain more. Once per combat, so its own bonus can't repeat it.</summary>
+/// <summary>
+/// Focused (Defect): the first time you gain Focus each combat, from any source, gain more. Once per combat, so its own bonus can't repeat
+/// it. Only a success uses the "once" up: a failed roll lets the next Focus gain try again.
+/// </summary>
 internal sealed class FirstFocusBonus : EffectHandler
 {
     private bool _used;
@@ -58,8 +61,10 @@ internal sealed class FirstFocusBonus : EffectHandler
     public override async Task OnPowerChanged(PlayerChoiceContext ctx, PowerModel power, decimal amount)
     {
         if (_used || power is not FocusPower || amount <= 0) return;
+        var bonus = Rolled();
+        if (bonus <= 0) return;   // failed roll: not used up
         _used = true;   // before the grant, so the grant's own power-change doesn't count as another first gain
-        await GrantPower<FocusPower>(ctx, Rolled());
+        await GrantPower<FocusPower>(ctx, bonus);
     }
 }
 

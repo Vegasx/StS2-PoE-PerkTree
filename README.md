@@ -77,6 +77,7 @@ Errors (exit code 1): bad JSON, unknown perk ids, edges to missing nodes, a tree
 - `type`: `minor`, `notable`, `cap` (capstone), `socket` or `start`. A socket is a free joint: it costs nothing and its neighbours become adjacent.
 - `fx`: perk id (ignored for sockets). `color`: display colour. `mod` and `tag`: which module a node came from, used for highlighting.
 - `arc`: `null` for a straight line, otherwise `{rx,ry,rot,sweep}` as in an SVG elliptical arc.
+- `labels` (optional list at the end of the file): editor-only text notes drawn on the canvas, each `{id,x,y,text}` plus optional `size`, `color` and `internal` (a module name, only shown with the Display toggle). Edit mode, Label tool (T): click empty space to add one, click to edit its text, size and colour in the side panel, drag to move, Del removes it. A tree file with no `labels` starts from the default captions. The exporter and the mod never read them.
 - Reaching a perk costs one point per perk node on the shortest path from the nearest start node, sockets free. Allocation needs an adjacent allocated node, except for a `start` node: a tree can have any number of them, and each one can be taken at any time without a neighbour (it still costs a point).
 
 ## Using this data in the mod
@@ -91,7 +92,7 @@ node tools/export-mod.mjs    # writes mod/data/runtime/effects.json and <charact
 Copy those files into the `data` folder next to `PerkTree.dll` (`<game>\mods\PerkTree\data`) to try them without rebuilding. The exporter refuses to write anything while there are errors. `docs/mod-integration.md` has the field-by-field mapping, what the mod still needs, and the one-line project change that ships the files with the build.
 
 What the exporter and the checks know about the mod, read from its source by `scan-mod.mjs`:
-- which perks have code at all (all 112 today), and which of those the mod rolls a chance for (94). The other 18 are always 100%: the resists, the luck perks, `execute_bonus`, `low_hp_draw`, `potion_slot`, `max_hp` and a few switches. The editor locks their chance field and the exporter reports an error if one is set below 100;
+- which perks have code at all (all 129 today), and which of those the mod rolls a chance for (111). The other 18 are always 100%: the resists, the luck perks, `execute_bonus`, `low_hp_draw`, `potion_slot`, `max_hp` and a few switches. The editor locks their chance field and the exporter reports an error if one is set below 100;
 - a perk's `chance` is the default for every node of it, and a single node can override it (Edit mode, side panel). Each node rolls on its own. The full rules are in `mod/docs/chance-model.md`.
 - a perk's number (`unit`) is the default amount for every node of it, and a single node can override that too (Edit mode, side panel, "Amount"). The override is saved on the node as `amount` and the exporter writes it as that node's magnitude, so totals, rolls and tooltips use the real amounts. On/off perks have no amount.
 

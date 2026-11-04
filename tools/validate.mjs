@@ -11,6 +11,7 @@ const err = m => errors.push(m), warn = m => warnings.push(m);
 const load = p => JSON.parse(readFileSync(join(root, p), 'utf8'));
 const read = p => { try { return load(p); } catch (e) { err(`${p}: ${e.message}`); return null; } };
 
+const iconFile = read('data/icons.json');
 const perksFile = read('data/perks.json'), kwFile = read('data/keywords.json'), pairsFile = read('data/pairs.json'), modFile = read('data/modules.json');
 if (!perksFile || !kwFile || !pairsFile || !modFile) finish();
 
@@ -26,6 +27,7 @@ for (const p of perksFile.perks) {
   if (!SCOPES.has(p.scope)) err(`perks.json: ${p.id} has scope ${p.scope}, expected S, E or X`);
   if (!KINDS.has(p.kind)) err(`perks.json: ${p.id} has kind ${p.kind}, expected add, pct or flag`);
   if (!Number.isFinite(p.unit)) err(`perks.json: ${p.id} unit is not a number`);
+  if (p.icon != null && iconFile && !iconFile.icons.includes(p.icon)) err(`perks.json: ${p.id} has icon ${p.icon}, which is not in data/icons.json`);
   if (p.cap != null && !Number.isFinite(p.cap)) err(`perks.json: ${p.id} cap is not a number`);
   if (p.chance != null && !(p.chance > 0 && p.chance <= 10000)) err(`perks.json: ${p.id} chance must be above 0 and at most 10000 (percent; above 100 gives sure successes plus a roll)`);
   if (p.kind === 'pct') warn(`perks.json: ${p.id} uses the legacy pct kind: make it kind add with a chance field`);

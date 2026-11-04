@@ -20,11 +20,11 @@ namespace PerkTree.Mod;
 /// </summary>
 internal sealed class PerkHostModel : AbstractModel
 {
-    public Player Owner { get; }
-    public PerkState State { get; }
+    public Player Owner { get; private set; }
+    public PerkState State { get; private set; }
 
     /// <summary>The only source of randomness for this player's perks (the game's seeded RNG; see PerkRng).</summary>
-    public PerkRng Rolls { get; }
+    public PerkRng Rolls { get; private set; }
 
     // Set at the player's FIRST vote on a map and held until the next room is entered. Votes can be changed or
     // cancelled in the game; if cancelling released the lock, "vote, respec, cancel" would defeat the lock rule.
@@ -34,16 +34,50 @@ internal sealed class PerkHostModel : AbstractModel
     // a double point award.
     private CombatRoom? _lastAwardedRoom;
 
-    public PerkHostModel(Player owner, PerkState state)
+    /// <summary>
+    /// The game builds exactly ONE instance of every AbstractModel subclass itself (ModelDb, with a public parameterless
+    /// constructor) and the base constructor registers the model's id, so a second `new PerkHostModel(...)` throws
+    /// DuplicateModelException (seen in the log when a run started). That one instance is the canonical placeholder: never
+    /// subscribed to hooks. Per-player hosts are made with <see cref="Create"/>, which clones it the way the game makes
+    /// its own mutable models.
+    /// </summary>
+    public PerkHostModel()
+    {
+        Owner = null!;
+        State = null!;
+        Rolls = null!;
+    }
+
+    public static PerkHostModel Create(Player owner, PerkState state)
+    {
+        var canonical = ModelDb.GetById<PerkHostModel>(ModelDb.GetId(typeof(PerkHostModel)));
+        var host = (PerkHostModel)canonical.MutableClone();
+        host.Attach(owner, state);
+        return host;
+    }
+
+    // A clone is a shallow copy, so every reference-type field would be SHARED with the canonical instance and with the other
+    // players' hosts. Give this host its own of everything.
+    private void Attach(Player owner, PerkState state)
     {
         Owner = owner;
         State = state;
         Rolls = new PerkRng(owner);
-        // The game only calls InitId itself for models it registers in ModelDb, and hook iteration never reads Id, so
-        // this is purely so that logging or ToString() on the model doesn't hit a null Id. It consults the game's
-        // id-serialization cache, which may reject a name it doesn't know, so a failure here must not be fatal.
-        try { InitId(new ModelId("PERK_HOST", $"PLAYER_{owner.NetId}")); }
-        catch (Exception e) { MainFile.LogWarn($"host model id not set ({e.GetType().Name}); continuing without one"); }
+        _votedThisMap = false;
+        _lastAwardedRoom = null;
+        _effective = new(StringComparer.Ordinal);
+        _rolls = new(StringComparer.Ordinal);
+        _caps = new(StringComparer.Ordinal);
+        _effectiveVersion = -1;
+        _handlers = new(StringComparer.Ordinal);
+        _active = Array.Empty<EffectHandler>();
+        _damageMods = Array.Empty<EffectHandler>();
+        _incomingMods = Array.Empty<EffectHandler>();
+        _activeVersion = -1;
+        _warned = new(StringComparer.Ordinal);
+        ConvertingVigor = false;
+        TurnEnd = new();
+        _potionStartedInCombat = false;
     }
 
     // Combat hooks (card played, turn start...) are needed by later effects. Room-level hooks are delivered to
@@ -52,9 +86,9 @@ internal sealed class PerkHostModel : AbstractModel
 
     // Per-effect committed totals, rebuilt only when the committed set changes. The resist patches read these on every
     // damage/block calculation, so it must be a dictionary lookup, not a re-sum of the tree.
-    private readonly Dictionary<string, decimal> _effective = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, IReadOnlyList<NodeRoll>> _rolls = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, decimal?> _caps = new(StringComparer.Ordinal);
+    private Dictionary<string, decimal> _effective = new(StringComparer.Ordinal);
+    private Dictionary<string, IReadOnlyList<NodeRoll>> _rolls = new(StringComparer.Ordinal);
+    private Dictionary<string, decimal?> _caps = new(StringComparer.Ordinal);
     private int _effectiveVersion = -1;
 
     private void RefreshTotals()
@@ -101,12 +135,12 @@ internal sealed class PerkHostModel : AbstractModel
 
     // One handler instance per effect, kept for the whole run so its counters survive; _active is the subset with a
     // committed total above zero, sorted by id so every client walks them in the same order.
-    private readonly Dictionary<string, EffectHandler> _handlers = new(StringComparer.Ordinal);
+    private Dictionary<string, EffectHandler> _handlers = new(StringComparer.Ordinal);
     private EffectHandler[] _active = Array.Empty<EffectHandler>();
     private EffectHandler[] _damageMods = Array.Empty<EffectHandler>(); // the active handlers that change outgoing damage (hot path)
     private EffectHandler[] _incomingMods = Array.Empty<EffectHandler>(); // ... and incoming damage (hot path)
     private int _activeVersion = -1;
-    private readonly HashSet<string> _warned = new(StringComparer.Ordinal);
+    private HashSet<string> _warned = new(StringComparer.Ordinal);
 
     private EffectHandler[] Active
     {
@@ -183,7 +217,7 @@ internal sealed class PerkHostModel : AbstractModel
     /// <summary>Set for the duration of a turn-end Vigor conversion, so the "each Vigor consumed" perks don't fire on it (as in the old mod).</summary>
     public bool ConvertingVigor { get; internal set; }
 
-    public TurnEndScratch TurnEnd { get; } = new();
+    public TurnEndScratch TurnEnd { get; private set; } = new();
 
     // Every hook below is delivered for EVERY player's host on every client (lockstep), so each one first checks that
     // the event belongs to this host's owner. Skipping that check would apply player A's perks to player B.
@@ -338,6 +372,13 @@ internal sealed class PerkHostModel : AbstractModel
     {
         if (!ReferenceEquals(dealer, Owner.Creature) || !CombatManager.Instance.IsInProgress) return;
         foreach (var handler in Active) await handler.OnDamageGiven(ctx, result, target);
+    }
+
+    public override CardLocation ModifyCardPlayResultLocation(CardModel card, bool isAutoPlay, ResourceInfo resources, CardLocation cardLocation)
+    {
+        if (!ReferenceEquals(card.Owner, Owner)) return cardLocation;
+        foreach (var handler in Active) cardLocation = handler.ModifyCardResult(card, isAutoPlay, resources, cardLocation);
+        return cardLocation;
     }
 
     // Was combat still running when the owner started using this potion? A potion that kills the last enemy ends the fight

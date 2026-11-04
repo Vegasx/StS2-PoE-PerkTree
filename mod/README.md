@@ -20,7 +20,7 @@ build order from section 13.
 | 3. Effect host | **first slice written** in `PerkTree.Mod` (compiles against the real game DLLs; not yet run in game) |
 | 4. Tree data format + validator | **done**, in `PerkTree.Core` |
 | 5. Allocation flow (points, pending/commit, lock, save/load) | **done** (not yet run in game): logic in `PerkTree.Core`; map hooks, debug console command and persistence in `PerkTree.Mod` |
-| 6. UI | not started |
+| 6. UI | **slice 1 built, never run in game**: a "Perks" button on the map screen opens a summary panel (`PerkUi.cs`). Tree screen not started |
 | 7. Co-op sync | **written, not yet run in game**: the lock is an ordered game action (`Net/CommitPerksAction.cs`), see "Co-op" below |
 | 8. Remaining characters | not started |
 
@@ -175,7 +175,7 @@ The sample tree has the three nodes at `gen_4`..`gen_6` so they can be tried in 
 
 ## Known gaps in the mod slice (not yet run in game)
 
-- **No UI.** Allocation is through the `perk` console command; the tree screen, entry button and summary view are step 6.
+- **Almost no UI.** The map screen has a "Perks" button with a summary panel (points, window state, totals). Allocation is still the `perk` console command; the tree screen is the next UI slice.
 - **Effect handlers: all 103 effects have code** (the 99 audited ones plus 4 added later, listed in `data/audit/added-effects.json`; 94 handler classes in `PerkTree.Mod/Effects/`, plus 3 resistance patches and 6 passive modifiers that other handlers read). None of the newest ones has been run in the game. See "What the mod can do" below.
 - **Co-op has never been run with two real players.** The pieces are written and each one is checked against the real game DLL (see "Co-op"), but only a two-player session can prove the round trip. `grant`, `alloc` and `open` in the debug console change this client only, so don't use them in multiplayer.
 - Harmony patch targets are checked against the real game assembly (they resolve and their injected parameters fit),

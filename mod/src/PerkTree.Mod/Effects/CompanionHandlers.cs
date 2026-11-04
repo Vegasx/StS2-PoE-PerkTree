@@ -154,7 +154,10 @@ internal sealed class SkillDamageAll : PerTurnCardCounter
 
 // ---- on damage taken -------------------------------------------------------------------------------------------
 
-/// <summary>Draw cards the first time you take HP damage each combat. Idiom: Centennial Puzzle.</summary>
+/// <summary>
+/// Draw cards the first time you take HP damage each combat. Idiom: Centennial Puzzle. "First" is only used up by a success: with a
+/// chance below 100% a failed roll lets the next unblocked hit try again, until one succeeds.
+/// </summary>
 internal sealed class DrawOnFirstHit : EffectHandler
 {
     private bool _used;
@@ -166,7 +169,9 @@ internal sealed class DrawOnFirstHit : EffectHandler
     {
         // Puzzle only counts damage that got through block.
         if (_used || result.UnblockedDamage <= 0) return;
+        var cards = Rolled();
+        if (cards <= 0) return;   // failed roll: not used up
         _used = true;
-        await Draw(ctx, Rolled());
+        await Draw(ctx, cards);
     }
 }

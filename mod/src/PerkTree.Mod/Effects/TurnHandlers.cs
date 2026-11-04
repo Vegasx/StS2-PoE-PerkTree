@@ -35,6 +35,24 @@ internal sealed class FirstTurnDraw : EffectHandler
     public override Task OnTurnStart(PlayerChoiceContext ctx, int turn) => turn == 1 ? Draw(ctx, Rolled()) : Task.CompletedTask;
 }
 
+/// <summary>
+/// Attuned: at the start of each of your turns, a chance for temporary Focus. Same game power as Prodigy (Hotfix's "Focus this turn"),
+/// which takes the Focus off again at the end of the turn by itself. Gives Focus only, so it can't loop.
+/// </summary>
+internal sealed class TurnFocusChance : EffectHandler
+{
+    public override string Id => "turn_focus_chance";
+    public override Task OnTurnStart(PlayerChoiceContext ctx, int turn) => GrantPower<HotfixPower>(ctx, Rolled());
+}
+
+/// <summary>Prepared: on your first turn, a chance to gain Energy. Same moment as Preemptive (right after the opening hand), each perk rolls on its own.</summary>
+internal sealed class FirstTurnEnergyChance : EffectHandler
+{
+    public override string Id => "first_turn_energy_chance";
+
+    public override Task OnTurnStart(PlayerChoiceContext ctx, int turn) => turn == 1 ? GrantEnergy(Rolled()) : Task.CompletedTask;
+}
+
 /// <summary>Extra cards each turn while at or below half HP.</summary>
 internal sealed class LowHpDraw : EffectHandler
 {
@@ -43,7 +61,7 @@ internal sealed class LowHpDraw : EffectHandler
         => Me.CurrentHp * 2 <= Me.MaxHp ? count + Amount : count;
 }
 
-/// <summary>Block the first time you drop to half HP in a combat.</summary>
+/// <summary>Block the first time you drop to half HP in a combat. Only a success uses it up: a failed roll tries again on the next HP loss while you are still at half or below.</summary>
 internal sealed class SecondWindBlock : EffectHandler
 {
     private bool _used;
@@ -54,12 +72,14 @@ internal sealed class SecondWindBlock : EffectHandler
     {
         // Only a drop counts, and not the hit that kills.
         if (_used || delta >= 0 || Me.CurrentHp <= 0 || Me.CurrentHp * 2 > Me.MaxHp) return;
+        var block = Rolled();
+        if (block <= 0) return;   // failed roll: not used up
         _used = true;
-        await GrantBlock(Rolled());
+        await GrantBlock(block);
     }
 }
 
-/// <summary>Strength the first time you lose HP in a combat (Ironclad).</summary>
+/// <summary>Strength the first time you lose HP in a combat (Ironclad). Only a success uses it up; a failed roll tries again on the next HP loss.</summary>
 internal sealed class FirstHpLossStrength : EffectHandler
 {
     private bool _used;
@@ -69,12 +89,14 @@ internal sealed class FirstHpLossStrength : EffectHandler
     public override async Task OnHpChanged(decimal delta)
     {
         if (_used || delta >= 0) return;
+        var strength = Rolled();
+        if (strength <= 0) return;   // failed roll: not used up
         _used = true;
-        await GrantPower<StrengthPower>(NoChoice(), Rolled());
+        await GrantPower<StrengthPower>(NoChoice(), strength);
     }
 }
 
-/// <summary>Cards drawn the first time you play a Power each combat.</summary>
+/// <summary>Cards drawn the first time you play a Power each combat. Only a success uses it up; a failed roll tries again on the next Power.</summary>
 internal sealed class PowerFirstDraw : EffectHandler
 {
     private bool _used;
@@ -84,12 +106,14 @@ internal sealed class PowerFirstDraw : EffectHandler
     public override async Task OnCardPlayed(PlayerChoiceContext ctx, CardPlay play)
     {
         if (_used || play.Card.Type != CardType.Power) return;
+        var cards = Rolled();
+        if (cards <= 0) return;   // failed roll: not used up
         _used = true;
-        await Draw(ctx, Rolled());
+        await Draw(ctx, cards);
     }
 }
 
-/// <summary>Energy when you play a Power, once per turn.</summary>
+/// <summary>Energy when you play a Power, once per turn. Only a success uses the turn's "once" up; a failed roll tries again on the next Power.</summary>
 internal sealed class PowerEnergy : EffectHandler
 {
     private bool _usedThisTurn;
@@ -100,8 +124,10 @@ internal sealed class PowerEnergy : EffectHandler
     public override async Task OnCardPlayed(PlayerChoiceContext ctx, CardPlay play)
     {
         if (_usedThisTurn || play.Card.Type != CardType.Power) return;
+        var energy = Rolled();
+        if (energy <= 0) return;   // failed roll: not used up
         _usedThisTurn = true;
-        await GrantEnergy(Rolled());
+        await GrantEnergy(energy);
     }
 }
 

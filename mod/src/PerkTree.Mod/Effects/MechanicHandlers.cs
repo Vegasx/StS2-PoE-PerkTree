@@ -3,6 +3,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Cards;
+using MegaCrit.Sts2.Core.Models.Orbs;
 using MegaCrit.Sts2.Core.Models.Powers;
 
 namespace PerkTree.Mod.Effects;
@@ -61,6 +62,24 @@ internal sealed class OrbChannelChance : EffectHandler
 }
 
 /// <summary>
+/// Prodigy: channeling an Orb can give temporary Focus (it goes away at the end of the turn). Uses the game's own "Focus this turn"
+/// power, Hotfix's (TemporaryFocusPower itself is abstract), which adds the Focus and takes it off again by itself. Every Orb counts,
+/// including ones other perks channel. Gives Focus and channels nothing, so it can't loop; Focal and Focused do react to the Focus.
+/// </summary>
+internal sealed class OrbChannelFocus : EffectHandler
+{
+    public override string Id => "orb_channel_focus";
+    public override Task OnOrbChanneled(PlayerChoiceContext ctx, OrbModel orb) => GrantPower<HotfixPower>(ctx, Rolled());
+}
+
+/// <summary>Thoughtful: channeling an Orb can give Block. Block channels nothing, so it can't loop.</summary>
+internal sealed class OrbChannelBlock : EffectHandler
+{
+    public override string Id => "orb_channel_block";
+    public override Task OnOrbChanneled(PlayerChoiceContext ctx, OrbModel orb) => GrantBlock(Rolled());
+}
+
+/// <summary>
 /// Supercharged: gain Focus while every Orb slot is full. It is rolled each time the slots BECOME full and taken away again as soon as
 /// they are not, so the Focus never outlives the full slots.
 /// </summary>
@@ -92,6 +111,26 @@ internal sealed class FocusWhenFull : EffectHandler
         }
     }
 }
+
+/// <summary>
+/// The five "one Orb type" versions of Preheated: Channel a SPECIFIC Orb before your first turn, same hook and same timing as Preheated
+/// (the one Cracked Core uses). The number is how many; Orbs the slots cannot hold push out the oldest, like any Channel.
+/// </summary>
+internal abstract class StartChannelOrbOfType<T> : EffectHandler where T : OrbModel
+{
+    public override async Task OnBeforeTurnStart(PlayerChoiceContext ctx, int turn)
+    {
+        if (turn > 1) return;
+        var count = (int)Rolled();
+        for (var i = 0; i < count; i++) await OrbCmd.Channel<T>(ctx, Owner);
+    }
+}
+
+internal sealed class StartChannelLightning : StartChannelOrbOfType<LightningOrb> { public override string Id => "start_channel_lightning"; }
+internal sealed class StartChannelFrost : StartChannelOrbOfType<FrostOrb> { public override string Id => "start_channel_frost"; }
+internal sealed class StartChannelDark : StartChannelOrbOfType<DarkOrb> { public override string Id => "start_channel_dark"; }
+internal sealed class StartChannelPlasma : StartChannelOrbOfType<PlasmaOrb> { public override string Id => "start_channel_plasma"; }
+internal sealed class StartChannelGlass : StartChannelOrbOfType<GlassOrb> { public override string Id => "start_channel_glass"; }
 
 /// <summary>Preheated: Orbs channeled before your first turn. Same hook the game's Cracked Core uses (BeforeSideTurnStart).</summary>
 internal sealed class StartChannelOrb : EffectHandler
@@ -185,6 +224,77 @@ internal sealed class StarEachTurn : EffectHandler
     {
         var stars = Rolled();
         if (stars > 0) await PlayerCmd.GainStars(stars, Owner);
+    }
+}
+
+/// <summary>
+/// Bellows (Regent): at the start of each of your turns, a chance to Forge. Each perk rolls on its own and forges its own amount.
+/// The Forge is credited to the perk host as its source, so Reforging, Tributary and the other "when you Forge" perks react to it,
+/// and none of them can Forge again, so it cannot loop.
+/// </summary>
+internal sealed class TurnForgeChance : EffectHandler
+{
+    public override string Id => "turn_forge_chance";
+
+    public override async Task OnTurnStart(PlayerChoiceContext ctx, int turn)
+    {
+        var amount = Rolled();
+        if (amount > 0) await ForgeCmd.Forge(amount, Owner, Host);
+    }
+}
+
+/// <summary>Aligned (Regent): on your first turn, a chance to gain Stars. Each perk rolls on its own.</summary>
+internal sealed class FirstTurnStarsChance : EffectHandler
+{
+    public override string Id => "first_turn_stars_chance";
+
+    public override async Task OnTurnStart(PlayerChoiceContext ctx, int turn)
+    {
+        if (turn != 1) return;
+        var stars = Rolled();
+        if (stars > 0) await PlayerCmd.GainStars(stars, Owner);
+    }
+}
+
+/// <summary>
+/// Steel (Regent): at the start of combat, a chance to Forge. "Start of combat" is the moment before your first turn begins (the
+/// hook Cracked Core and Preheated use), because Forging can put a Sovereign Blade in your hand and the piles are only ready by then.
+/// Each perk rolls on its own. Like Bellows, the Forge is credited to the perk host, so Reforging, Tributary and Riposte react.
+/// </summary>
+internal sealed class CombatForgeChance : EffectHandler
+{
+    public override string Id => "combat_forge_chance";
+
+    public override async Task OnBeforeTurnStart(PlayerChoiceContext ctx, int turn)
+    {
+        if (turn > 1) return;
+        var amount = Rolled();
+        if (amount > 0) await ForgeCmd.Forge(amount, Owner, Host);
+    }
+}
+
+/// <summary>Riposte (Regent): whenever you Forge (from a card, a relic or another perk), a chance to gain Block. The Forge hook carries no choice context; Block needs none.</summary>
+internal sealed class ForgeBlockChance : EffectHandler
+{
+    public override string Id => "forge_block_chance";
+
+    public override Task OnForge(decimal amount) => amount > 0 ? GrantBlock(Rolled()) : Task.CompletedTask;
+}
+
+/// <summary>
+/// Mastercraft (Regent capstone): every time you play Sovereign Blade, Forge. A flat amount per perk (no chance unless you give it one).
+/// It Forges after the attack has resolved, so the extra damage is for the next swing. The Forge goes through the host like Bellows,
+/// so Riposte and the other "when you Forge" perks react; none of them play the Blade, so it cannot loop.
+/// </summary>
+internal sealed class BladeAttackForge : EffectHandler
+{
+    public override string Id => "blade_attack_forge";
+
+    public override async Task OnCardPlayed(PlayerChoiceContext ctx, CardPlay play)
+    {
+        if (play.Card is not SovereignBlade) return;
+        var amount = Rolled();
+        if (amount > 0) await ForgeCmd.Forge(amount, Owner, Host);
     }
 }
 

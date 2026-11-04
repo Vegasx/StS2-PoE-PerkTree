@@ -29,6 +29,9 @@ internal static class PerkRuntime
     /// The delegate given to ModHelper.SubscribeForRunStateHooks. Runs on every hook iteration, so it must stay a
     /// cheap lookup once the hosts for the run exist.
     /// </summary>
+    /// <summary>The hosts built for the current run (empty before the first run hook), for the combat-state subscription.</summary>
+    public static IEnumerable<AbstractModel> CurrentHosts => _hostList;
+
     public static IEnumerable<AbstractModel> HostsFor(RunState run)
     {
         if (!ReferenceEquals(run, _run))
@@ -41,7 +44,7 @@ internal static class PerkRuntime
             {
                 var state = PerkData.CreateState(player, saved?.For(player.NetId, player.Character.Id.Entry));
                 if (state is null) continue;
-                var host = new PerkHostModel(player, state);
+                var host = PerkHostModel.Create(player, state);
                 ByPlayer[player.NetId] = host;
                 _hostList.Add(host);
             }

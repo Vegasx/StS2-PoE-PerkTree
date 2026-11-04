@@ -92,6 +92,9 @@ public sealed class NodeDef
     // Layout only; Core never reads these. They live here so the tree stays one data-driven file.
     public double X { get; init; }
     public double Y { get; init; }
+
+    /// <summary>The editor colour of the node ("#rrggbb"), for the in-game tree. Null means the default grey.</summary>
+    public string? Color { get; init; }
 }
 
 public sealed class TreeDef
@@ -106,4 +109,24 @@ public sealed class TreeDef
 
     /// <summary>Undirected links, each a two-element [idA, idB] array.</summary>
     public List<string[]> Edges { get; init; } = new();
+
+    // Display only, for the in-game tree: the editor's sockets (free joints the rules skip) and every line as drawn in the editor,
+    // arcs already flattened to points by the exporter. Core never reads these; older tree files simply have none.
+    public List<SocketDef> Sockets { get; init; } = new();
+    public List<LineDef> Lines { get; init; } = new();
+}
+
+public sealed class SocketDef
+{
+    public string Id { get; init; } = "";
+    public double X { get; init; }
+    public double Y { get; init; }
+}
+
+public sealed class LineDef
+{
+    public string A { get; init; } = "";
+    public string B { get; init; } = "";
+    /// <summary>Points along an arc, start to end. Null for a straight line.</summary>
+    public List<double[]>? Pts { get; init; }
 }

@@ -142,6 +142,7 @@ internal sealed class VigorUnusedStrengthPct : EffectHandler
 /// <summary>
 /// "Gaining X gives +1 more, at most 3 times a turn." One base for both users: Vigor (vigor_gain_amplify) and Strength/Dexterity
 /// (gain_amplify). The bonus is itself a power gain, so it would trigger this again; the flag stops that loop.
+/// Only a success counts toward the 3: a failed roll leaves the turn's limit untouched.
 /// </summary>
 internal abstract class GainAmplifyBase : EffectHandler
 {
@@ -152,7 +153,7 @@ internal abstract class GainAmplifyBase : EffectHandler
     /// <summary>Is this the kind of power this perk amplifies?</summary>
     protected abstract bool Amplifies(PowerModel gained);
 
-    protected abstract Task GrantBonus(PlayerChoiceContext ctx, PowerModel gained);
+    protected abstract Task GrantBonus(PlayerChoiceContext ctx, PowerModel gained, decimal bonus);
 
     public override void ResetCombat() { _usedThisTurn = 0; _applying = false; }
     public override Task OnTurnStart(PlayerChoiceContext ctx, int turn) { _usedThisTurn = 0; return Task.CompletedTask; }
@@ -160,9 +161,11 @@ internal abstract class GainAmplifyBase : EffectHandler
     public override async Task OnPowerChanged(PlayerChoiceContext ctx, PowerModel power, decimal amount)
     {
         if (_applying || amount <= 0 || _usedThisTurn >= MaxPerTurn || !Amplifies(power)) return;
+        var bonus = Rolled();
+        if (bonus <= 0) return;   // failed roll: not counted
         _usedThisTurn++;
         _applying = true;
-        try { await GrantBonus(ctx, power); }
+        try { await GrantBonus(ctx, power, bonus); }
         finally { _applying = false; }
     }
 }
@@ -171,7 +174,7 @@ internal sealed class VigorGainAmplify : GainAmplifyBase
 {
     public override string Id => "vigor_gain_amplify";
     protected override bool Amplifies(PowerModel gained) => gained is VigorPower;
-    protected override Task GrantBonus(PlayerChoiceContext ctx, PowerModel gained) => GrantPower<VigorPower>(ctx, Rolled());
+    protected override Task GrantBonus(PlayerChoiceContext ctx, PowerModel gained, decimal bonus) => GrantPower<VigorPower>(ctx, bonus);
 }
 
 /// <summary>Resonant: gaining Strength or Dexterity gives +1 more (3 times a turn between them).</summary>
@@ -180,6 +183,6 @@ internal sealed class GainAmplify : GainAmplifyBase
     public override string Id => "gain_amplify";
     protected override bool Amplifies(PowerModel gained) => gained is StrengthPower or DexterityPower;
 
-    protected override Task GrantBonus(PlayerChoiceContext ctx, PowerModel gained)
-        => gained is StrengthPower ? GrantPower<StrengthPower>(ctx, Rolled()) : GrantPower<DexterityPower>(ctx, Rolled());
+    protected override Task GrantBonus(PlayerChoiceContext ctx, PowerModel gained, decimal bonus)
+        => gained is StrengthPower ? GrantPower<StrengthPower>(ctx, bonus) : GrantPower<DexterityPower>(ctx, bonus);
 }

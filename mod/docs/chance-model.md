@@ -41,7 +41,7 @@ The roll is at the moment the perk would act, not when the combat starts:
 
 - Event perks (on kill, on card played, on potion used...): one roll per event.
 - Combat-start and turn-start perks: one roll at that moment.
-- Once-per-combat / once-per-turn triggers: the trigger is used up when it fires, even if the roll fails.
+- Once-per-combat / once-per-turn triggers (decided 2026-11-02): the trigger is only used up when the effect actually happens. A failed roll leaves it available, so the next chance to trigger tries again, until one succeeds. Applies to Renewing, Insightful, Studious, Overflowing, Cursefed, Bloodforged, Focused, Savage, and to the 3-a-turn limit of Resonant and Surging (only a bonus that happens counts).
 - "Every Nth" perks (every 4th turn, every 12th attack): the count goes on regardless, the roll happens when the Nth comes up.
 - "Per X" perks (per relic, per 300 gold, per 2 HP lost, per Energy gained): one roll, then multiplied by X.
 - "Each Vigor point spent" and "each unused Vigor": one roll per point, per perk.

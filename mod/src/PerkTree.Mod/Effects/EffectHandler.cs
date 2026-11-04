@@ -118,6 +118,12 @@ internal abstract class EffectHandler
     /// <summary>AfterPotionUsed, for a potion the owner used during combat. Potion hooks carry no choice context.</summary>
     public virtual Task OnPotionUsed(PotionModel potion, Creature? target) => Task.CompletedTask;
 
+    /// <summary>
+    /// Where a card the owner is playing ends up (ModifyCardPlayResultLocation). Asked ONCE per play, when the play starts (never for previews),
+    /// in the same order on every client, so a handler may roll here. Return the location unchanged to leave it alone.
+    /// </summary>
+    public virtual CardLocation ModifyCardResult(CardModel card, bool isAutoPlay, ResourceInfo resources, CardLocation location) => location;
+
     /// <summary>True for a perk that must also see the potion that ended the fight (it killed the last enemy). Only Recycler: it is about the potion, not the fight.</summary>
     public virtual bool RunsWhenPotionEndsCombat => false;
 
