@@ -96,8 +96,3 @@ What the exporter and the checks know about the mod, read from its source by `sc
 - a perk's `chance` is the default for every node of it, and a single node can override it (Edit mode, side panel). Each node rolls on its own. The full rules are in `mod/docs/chance-model.md`.
 - a perk's number (`unit`) is the default amount for every node of it, and a single node can override that too (Edit mode, side panel, "Amount"). The override is saved on the node as `amount` and the exporter writes it as that node's magnitude, so totals, rolls and tooltips use the real amounts. On/off perks have no amount.
 
-## Design notes
-
-Steady, Kindled, Guarded, Patient, Restful and Provisioned are available in the editor's perk picker and Balance tab. They are additive general perks; adding them to the catalog does not place nodes in existing trees. See [minor perk behavior and verification](mod/docs/minor-perks.md).
-
-The design, audit and recon notes live in the Relic Forge project on claude.ai. Working perk names are the old Relic Forge prefix names.
