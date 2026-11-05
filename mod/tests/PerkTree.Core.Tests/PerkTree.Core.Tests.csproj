@@ -20,6 +20,9 @@
   <ItemGroup>
     <!-- Tests read the same sample files that document the format, so the docs can't rot. -->
     <None Include="..\..\data\sample\*.json" LinkBase="sample" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Read the editable definitions without requiring or changing the user's runtime export. -->
+    <None Include="..\..\..\data\perks.json" Link="editor/perks.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\..\data\trees\regent.json" Link="editor/regent.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

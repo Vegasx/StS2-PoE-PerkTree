@@ -53,6 +53,9 @@ internal static class HandlerRegistry
         () => new StarEachTurn(), () => new ForgeStar(), () => new ForgeDrawChance(), () => new StarRefundChance(), () => new StarGainChance(),
         // added after the audit
         () => new TurnHeal(), () => new FocusGainChance(), () => new PlayCopyChance(), () => new CombatGoldReward(),
+        // repeatable minor perks
+        () => new FirstSkillBlock(), () => new FirstExhaustVigor(), () => new FirstDebuffBlock(),
+        () => new EndTurnEnergyBlock(), () => new RestHealBonus(), () => new ShopGold(),
         // run from Harmony patches (EffectPatches.cs)
         () => new ExhaustDodge(), () => new EtherealSave(), () => new EnergyDischarge(), () => new DoomDefer());
 
@@ -81,6 +84,7 @@ internal static class HandlerRegistry
         "ethereal_save", "spread_debuffs_on_kill", "doom_defer",
         "potion_slot", // a permanent slot count, not an event
         "max_hp",      // a permanent stat, not an event
+        "rest_heal_bonus", // native heal previews must be pure, like other stat modifiers
         "gold_armor", // its discount is worked out inside the damage calculation, which also runs for previews and so cannot roll
     };
 

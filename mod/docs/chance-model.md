@@ -15,7 +15,7 @@ A node gives an **amount** when it **succeeds**. Two numbers, kept apart:
 - A chance past 1 gives its whole part as sure successes and rolls the rest: 1.5 = one sure success and a 50% roll. Limit: 100 successes per trigger.
 - A node at exactly 1 never touches the RNG. A tree where nobody sets a chance behaves like plain sums.
 - The *cap* of an effect (on/off switches, resists) caps the rolled amount too.
-- **Luck perks** (`proc_boost`, `proc_double`, `proc_reroll`) only change nodes whose chance is below 1: `(chance + boost) x (1 + double)`, whole part guaranteed, `proc_reroll` gives failed rolls extra tries (up to 5).
+- **Luck perks** (`proc_boost`, `proc_double`, `proc_reroll`) only change nodes whose chance is below 1: `(chance + boost) x (1 + double)`, whole part guaranteed. Empowering (`proc_reroll`) is additive: each node grants one extra attempt after a failed roll. One node allows 2 total attempts; two allow 3. Stop at the first success. The limit is 5 total attempts, including Frenzied's extra attempt; Empowering's data cap is 4 retries.
 
 ## What the editor and exporter write
 

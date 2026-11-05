@@ -58,8 +58,9 @@ Validation on 2026-11-04:
   table and rebuilt/reinstalled. The user confirmed both header behavior and corrected tooltip rendering.
 - Follow-up removal of tier labels and addition of node-colored numeric values: release build passed;
   visual check deferred to the user (no computer vision).
-- Editor validator has an existing error: Regent places the on/off perk `proc_reroll` twice. No tree or balance
-  data was changed for this UI work.
+- At the time of this UI work, the editor validator flagged Regent's two on/off `proc_reroll` nodes. Empowering was
+  subsequently made additive in the editable catalog: both nodes contribute a retry after exporting, and the
+  duplicate-flag validation error is resolved. Runtime data is updated by the editor's exporter.
 
 The installed update consists of `PerkTree.dll` and `data/text.json` only. Backups of the previous installed
 files are in the ignored `mod/backups/before-cursor-tooltips-*` directory. Restart the game to load the DLL.

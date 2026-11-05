@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Rewards;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace PerkTree.Mod.Effects;
@@ -90,6 +91,12 @@ internal abstract class EffectHandler
 
     /// <summary>AfterRoomEntered for a combat room. The slot native start-of-combat powers (Bronze Scales) use.</summary>
     public virtual Task OnCombatRoomEntered(PlayerChoiceContext ctx) => Task.CompletedTask;
+
+    /// <summary>AfterRoomEntered for any room, including shops. Only committed handlers receive it.</summary>
+    public virtual Task OnRoomEntered(AbstractRoom room) => Task.CompletedTask;
+
+    /// <summary>Pure modifier for the owner's native campfire Rest heal, including previews. Never roll here.</summary>
+    public virtual decimal ModifyRestHeal(decimal amount) => amount;
 
     /// <summary>AfterPlayerTurnStartLate (after the hand is drawn, like Blood Vial). turn is the player's 1-based turn.</summary>
     public virtual Task OnTurnStart(PlayerChoiceContext ctx, int turn) => Task.CompletedTask;

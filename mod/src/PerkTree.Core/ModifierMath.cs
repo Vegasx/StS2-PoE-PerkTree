@@ -22,7 +22,9 @@ public static class ModifierMath
         return (chance + Math.Max(0m, boost)) * (1m + Math.Max(0m, doubleTotal));
     }
 
-    /// <summary>How many rolls a proc gets: one, plus one per whole point of proc_reroll, plus <paramref name="extra"/> (Frenzied gives the Vigor-spending perks one), up to <see cref="MaxRolls"/>.</summary>
+    /// <summary>How many attempts a proc gets: the original roll plus one per whole point of additive Empowering (proc_reroll).
+    /// Two normal Empowering nodes give three attempts. Add <paramref name="extra"/> (Frenzied's Vigor retry), up to
+    /// <see cref="MaxRolls"/> total attempts; stop retrying as soon as one succeeds.</summary>
     public static int ProcRolls(decimal rerollTotal, int extra = 0)
         => Math.Min(MaxRolls, 1 + (int)Math.Min(MaxRolls - 1, Math.Floor(Math.Max(0m, rerollTotal))) + Math.Max(0, extra));
 

@@ -235,6 +235,7 @@ internal sealed class PerkHostModel : AbstractModel
         _votedThisMap = false; // a new map cycle begins once the party has moved on
         await ReconcilePotionSlots();
         await ReconcileMaxHp();
+        foreach (var handler in Active) await handler.OnRoomEntered(room);
 
         // The game's documented place for "start of combat" powers: before the first turn, with a CombatRoom check.
         if (room is not CombatRoom) return;
@@ -335,7 +336,7 @@ internal sealed class PerkHostModel : AbstractModel
 
     public override async Task BeforeSideTurnEnd(PlayerChoiceContext ctx, CombatSide side, IEnumerable<Creature> creatures)
     {
-        if (side != CombatSide.Player || !Owner.Creature.IsAlive) return;
+        if (side != CombatSide.Player || !Owner.Creature.IsAlive || !creatures.Contains(Owner.Creature)) return;
 
         TurnEnd.UnusedVigor = (int)Owner.Creature.GetPowerAmount<VigorPower>();
         TurnEnd.ConsumeVigor = false;
@@ -365,6 +366,13 @@ internal sealed class PerkHostModel : AbstractModel
         var turn = player.PlayerCombatState?.TurnNumber ?? 0;
         foreach (var handler in Active) count = handler.ModifyHandDraw(count, turn);
         return count;
+    }
+
+    public override decimal ModifyRestSiteHealAmount(Creature creature, decimal amount)
+    {
+        if (!ReferenceEquals(creature, Owner.Creature)) return amount;
+        foreach (var handler in Active) amount = handler.ModifyRestHeal(amount);
+        return amount;
     }
 
     public override async Task AfterDamageGiven(

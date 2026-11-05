@@ -28,5 +28,11 @@
 {"id": "start_channel_glass", "name": "Glazed", "note": "Added 2026-11-02 after the audit: Preheated split: Glass Orb at combat start."},
 {"id": "orb_channel_focus", "name": "Prodigy", "note": "Added 2026-11-02 after the audit: channeling an Orb has a chance to give temporary Focus."},
 {"id": "orb_channel_block", "name": "Thoughtful", "note": "Added 2026-11-02 after the audit: channeling an Orb has a chance to give Block."},
-{"id": "turn_focus_chance", "name": "Attuned", "note": "Added 2026-11-02 after the audit: start of turn has a chance to give temporary Focus."}
+{"id": "turn_focus_chance", "name": "Attuned", "note": "Added 2026-11-02 after the audit: start of turn has a chance to give temporary Focus."},
+{"id": "first_skill_block", "name": "Steady", "note": "Added 2026-11-04: the first Skill each turn grants Block."},
+{"id": "first_exhaust_vigor", "name": "Kindled", "note": "Added 2026-11-04: the first card Exhausted each turn grants Vigor."},
+{"id": "first_debuff_block", "name": "Guarded", "note": "Added 2026-11-04: the first debuff you apply to an enemy each turn grants Block."},
+{"id": "end_turn_energy_block", "name": "Patient", "note": "Added 2026-11-04: ending your turn with unspent Energy grants Block."},
+{"id": "rest_heal_bonus", "name": "Restful", "note": "Added 2026-11-04: adds to the native campfire Rest heal amount and preview."},
+{"id": "shop_gold", "name": "Provisioned", "note": "Added 2026-11-04: grants Gold on shop entry, once per saved shop floor."}
 ]

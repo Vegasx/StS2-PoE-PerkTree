@@ -1,6 +1,12 @@
 {
 "schemaVersion":2,
 "effects":[
+{"id":"first_skill_block","scope":"self","keywords":["Block"]},
+{"id":"first_exhaust_vigor","scope":"self","keywords":["Vigor","Exhaust"]},
+{"id":"first_debuff_block","scope":"self","keywords":["Block"]},
+{"id":"end_turn_energy_block","scope":"self","keywords":["Block","Energy"]},
+{"id":"rest_heal_bonus","scope":"self"},
+{"id":"shop_gold","scope":"self"},
 {"id":"start_thorns","scope":"self","keywords":["Thorns"]},
 {"id":"start_block","scope":"self","keywords":["Block"]},
 {"id":"damaged_block_chance","scope":"self","keywords":["Block"],"chance":0.1},
