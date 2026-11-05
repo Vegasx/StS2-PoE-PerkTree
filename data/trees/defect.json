@@ -45,8 +45,8 @@
 {"id":"n41","x":240.4,"y":-240.4,"type":"minor","fx":"first_turn_draw","color":"#6fbf5f","mod":1,"tag":"tempo"},
 {"id":"n42","x":268.7,"y":-268.7,"type":"minor","fx":"first_turn_draw","color":"#6fbf5f","mod":1,"tag":"tempo"},
 {"id":"n43","x":298.4,"y":-298.4,"type":"minor","fx":"draw_on_first_hit","color":"#6fbf5f","mod":1,"tag":"tempo"},
-{"id":"n44","x":325.3,"y":-325.3,"type":"minor","fx":"low_hp_draw","color":"#6fbf5f","mod":1,"tag":"tempo"},
-{"id":"n45","x":352.1,"y":-352.1,"type":"minor","fx":"low_hp_draw","color":"#6fbf5f","mod":1,"tag":"tempo"},
+{"id":"n44","x":325.3,"y":-325.3,"type":"minor","fx":"free_attack_return_chance","chance":15,"color":"#6fbf5f","mod":1,"tag":"tempo"},
+{"id":"n45","x":352.1,"y":-352.1,"type":"minor","fx":"free_attack_return_chance","chance":15,"color":"#6fbf5f","mod":1,"tag":"tempo"},
 {"id":"n46","x":379,"y":-379,"type":"minor","fx":"second_wind_block","color":"#6fbf5f","mod":1,"tag":"tempo"},
 {"id":"n47","x":455.4,"y":-455.4,"type":"notable","fx":"power_first_draw","color":"#6fbf5f","mod":1,"tag":"tempo"},
 {"id":"n48","x":511.9,"y":-511.9,"type":"cap","fx":"energy_for_hp","color":"#6fbf5f","mod":1,"tag":"tempo"},
@@ -59,7 +59,7 @@
 {"id":"n55","x":416.5,"y":-527,"type":"minor","fx":"energy_every_n_turns","color":"#6fbf5f","mod":1,"tag":"tempo"},
 {"id":"n56","x":470.7,"y":-532.1,"type":"minor","fx":"hit_energy_chance","color":"#6fbf5f","mod":1,"tag":"tempo"},
 {"id":"n57","x":422.6,"y":-373.6,"type":"minor","fx":"retain_random","color":"#6fbf5f","mod":1,"tag":"tempo"},
-{"id":"n58","x":460.8,"y":-411.8,"type":"minor","fx":"free_attack_return_chance","color":"#6fbf5f","mod":1,"tag":"tempo"},
+{"id":"n58","x":460.8,"y":-411.8,"type":"minor","fx":"draw_on_first_hit","color":"#6fbf5f","mod":1,"tag":"tempo"},
 {"id":"n59","x":339.7,"y":-278.3,"type":"minor","fx":"turn_exhaust_chance","color":"#6fbf5f","mod":1,"tag":"tempo"},
 {"id":"n60","x":393.9,"y":-283.3,"type":"minor","fx":"skill_draw_chance","color":"#6fbf5f","mod":1,"tag":"tempo"},
 {"id":"n61","x":450.4,"y":-312.5,"type":"minor","fx":"hit_energy_chance","color":"#6fbf5f","mod":1,"tag":"tempo"},
@@ -286,7 +286,7 @@
 {"id":"n285","x":-650,"y":-60,"type":"start","fx":"max_hp","color":"#6fbf5f","mod":null,"tag":"custom"},
 {"id":"n286","x":-650,"y":-10,"type":"minor","fx":"max_hp","color":"#6fbf5f","mod":null,"tag":"custom"},
 {"id":"n287","x":-650,"y":40,"type":"minor","fx":"max_hp","color":"#6fbf5f","mod":null,"tag":"custom"},
-{"id":"n288","x":-650,"y":90,"type":"cap","fx":"exhaust_dodge","color":"#6fbf5f","mod":null,"tag":"custom"},
+{"id":"n288","x":-650,"y":90,"type":"cap","fx":"exhaust_dodge","chance":25,"color":"#6fbf5f","mod":null,"tag":"custom"},
 {"id":"n289","x":-510,"y":-60,"type":"start","fx":"max_hp","color":"#d4467a","mod":null,"tag":"custom"},
 {"id":"n290","x":-510,"y":-10,"type":"minor","fx":"max_hp","color":"#d4467a","mod":null,"tag":"custom"},
 {"id":"n291","x":-510,"y":40,"type":"minor","fx":"max_hp","color":"#d4467a","mod":null,"tag":"custom"},
@@ -307,7 +307,8 @@
 {"id":"n306","x":-270,"y":-690,"type":"minor","fx":"start_channel_glass","color":"#c9ccd6","mod":null,"tag":"custom"},
 {"id":"n307","x":-270,"y":-600,"type":"minor","fx":"start_channel_dark","color":"#c9ccd6","mod":null,"tag":"custom"},
 {"id":"n308","x":-170,"y":-600,"type":"minor","fx":"start_channel_lightning","color":"#c9ccd6","mod":null,"tag":"custom"},
-{"id":"n309","x":-220,"y":-640,"type":"socket","fx":"orb_channel_focus","color":"#c9ccd6","mod":null,"tag":"custom"}
+{"id":"n309","x":-220,"y":-640,"type":"socket","fx":"orb_channel_focus","color":"#c9ccd6","mod":null,"tag":"custom"},
+{"id":"n310","x":420,"y":-420,"type":"notable","fx":"free_attack_return_chance","color":"#6fbf5f","mod":1,"tag":"tempo","chance":35}
 ],
 "edges":[
 {"a":"n1","b":"n17","arc":null,"slot":0},
@@ -649,7 +650,8 @@
 {"a":"n309","b":"n307","arc":null,"slot":null},
 {"a":"n308","b":"n309","arc":null,"slot":null},
 {"a":"n309","b":"n306","arc":null,"slot":null},
-{"a":"n309","b":"n23","arc":null,"slot":null}
+{"a":"n309","b":"n23","arc":null,"slot":null},
+{"a":"n310","b":"n47","arc":null,"slot":null}
 ],
 "labels":[
 {"id":"l0","x":0,"y":40,"text":"Start"},

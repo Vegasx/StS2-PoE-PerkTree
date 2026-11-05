@@ -9,6 +9,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
+    <!-- Register our native NTopBarButton subclass with Godot's C# bridge. -->
+    <GodotProjectDir>$(MSBuildProjectDirectory)</GodotProjectDir>
 
     <!-- The game finds the mod by folder + manifest id, and loads <id>.dll, so the assembly must be named PerkTree. -->
     <AssemblyName>PerkTree</AssemblyName>
@@ -24,6 +26,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Godot.SourceGenerators" Version="4.5.1" PrivateAssets="all" />
     <!-- Private=false: never copy the game's own DLLs into our output; the game already has them loaded. -->
     <Reference Include="sts2"><HintPath>$(Sts2LibDir)\sts2.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="GodotSharp"><HintPath>$(Sts2LibDir)\GodotSharp.dll</HintPath><Private>false</Private></Reference>
@@ -46,6 +49,7 @@
 
     <!-- Coin icons (art/perk-tokens-v1, png-128) and their rim-tint shader, loaded at runtime from icons/ next to the dll. -->
     <None Include="..\..\assets\icons\*" LinkBase="icons" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\assets\ui\*.png" LinkBase="ui" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

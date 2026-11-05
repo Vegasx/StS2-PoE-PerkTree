@@ -309,7 +309,7 @@
 {"id":"n309","x":930,"y":-80,"type":"start","fx":"max_hp","color":"#6fbf5f","mod":null,"tag":"custom"},
 {"id":"n310","x":930,"y":-30,"type":"minor","fx":"max_hp","color":"#6fbf5f","mod":null,"tag":"custom"},
 {"id":"n311","x":930,"y":20,"type":"minor","fx":"max_hp","color":"#6fbf5f","mod":null,"tag":"custom"},
-{"id":"n312","x":930,"y":70,"type":"cap","fx":"exhaust_dodge","color":"#6fbf5f","mod":null,"tag":"custom"},
+{"id":"n312","x":930,"y":70,"type":"cap","fx":"exhaust_dodge","chance":25,"color":"#6fbf5f","mod":null,"tag":"custom"},
 {"id":"n313","x":1070,"y":-80,"type":"start","fx":"max_hp","color":"#d4467a","mod":null,"tag":"custom"},
 {"id":"n314","x":1070,"y":-30,"type":"minor","fx":"max_hp","color":"#d4467a","mod":null,"tag":"custom"},
 {"id":"n315","x":1070,"y":20,"type":"minor","fx":"max_hp","color":"#d4467a","mod":null,"tag":"custom"},

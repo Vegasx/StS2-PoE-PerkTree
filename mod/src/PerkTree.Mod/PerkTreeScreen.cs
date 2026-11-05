@@ -1,7 +1,10 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Godot;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Nodes.Screens.Map;
+using PerkTree.Mod.Effects;
 
 namespace PerkTree.Mod;
 
@@ -14,6 +17,10 @@ namespace PerkTree.Mod;
 internal static class PerkTreeScreen
 {
     private const string NodeName = "PerkTreeScreen";
+    // Skip existing BBCode tags; color numeric values only, including fixed costs and thresholds.
+    private static readonly Regex TooltipNumbers = new(@"\[[^\]]*\]|(?<![\p{L}\p{N}_])[-+]?\d+(?:[.,]\d+)?(?:%|x)?", RegexOptions.CultureInvariant);
+
+    internal static bool IsOpen(NMapScreen map) => map.GetNodeOrNull<CanvasLayer>(NodeName)?.Visible == true;
 
     // Node sizes per tier, in tree units (the editor's coordinates). Zoom scales the whole world.
     private static float SizeOf(NodeTier tier) => tier switch { NodeTier.Keystone => 62f, NodeTier.Notable => 44f, _ => 32f };
@@ -125,7 +132,7 @@ internal static class PerkTreeScreen
             world.AddChild(dot);
         }
 
-        // ---- top bar: status, info about the hovered node, buttons
+        // ---- top bar: persistent allocation status and buttons; perk details live beside the cursor.
         var bar = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Stop };
         bar.SetAnchorsPreset(Control.LayoutPreset.TopWide);
         var barBox = new VBoxContainer();
@@ -136,14 +143,23 @@ internal static class PerkTreeScreen
         row.AddChild(status);
         row.AddChild(refundAll);
         row.AddChild(close);
-        var info = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart, CustomMinimumSize = new Vector2(0, 48) };
         barBox.AddChild(row);
-        barBox.AddChild(info);
         var pad = new MarginContainer();
         foreach (var side in new[] { "left", "right", "top", "bottom" }) pad.AddThemeConstantOverride($"margin_{side}", 10);
         pad.AddChild(barBox);
         bar.AddChild(pad);
         layer.AddChild(bar);
+
+        var tooltip = new PerkHoverTips(layer, bg);
+        string? hoveredId = null;
+        Control? hoveredButton = null;
+        string? hoverError = null;
+        void ShowTooltip()
+        {
+            if (hoveredId == null || hoveredButton == null) return;
+            var perkTip = Describe(graph, state, text, hoveredId, hoverError);
+            tooltip.Show(hoveredButton, perkTip, graph.EffectOf(graph.Node(hoveredId)).Keywords);
+        }
 
         // ---- nodes: a coin icon (art/perk-tokens-v1, rim tinted with the node colour by branch_tint.gdshader) under an invisible
         // button that takes the clicks and draws a state ring. Perks without an icon get a plain coloured disc.
@@ -190,12 +206,25 @@ internal static class PerkTreeScreen
             coins[node.Id] = (coin, mat, ring, disc);
 
             var id = node.Id;
-            button.MouseEntered += () => info.Text = Describe(graph, state, text, id);
+            button.MouseEntered += () =>
+            {
+                hoveredId = id;
+                hoveredButton = button;
+                hoverError = null;
+                ShowTooltip();
+            };
+            button.MouseExited += () =>
+            {
+                if (hoveredId != id) return;
+                hoveredId = null;
+                hoveredButton = null;
+                hoverError = null;
+                tooltip.Hide();
+            };
             button.Pressed += () =>
             {
                 var result = state.IsAllocated(id) ? state.TryRefundPending(id) : state.TryAllocate(id);
-                if (result != PerkOpResult.Ok) info.Text = $"{Describe(graph, state, text, id)}\n[{Explain(result)}]";
-                else info.Text = Describe(graph, state, text, id);
+                hoverError = result == PerkOpResult.Ok ? null : Explain(result);
                 Refresh();
             };
             world.AddChild(button);
@@ -204,7 +233,7 @@ internal static class PerkTreeScreen
         // ---- pan / zoom
         var zoom = 0.6f;
         var pan = Vector2.Zero;
-        void ApplyView() { world.Scale = new Vector2(zoom, zoom); world.Position = pan; }
+        void ApplyView() { tooltip.Hide(); world.Scale = new Vector2(zoom, zoom); world.Position = pan; }
 
         // Fit the whole tree on screen, centred, below the top bar. Done after the layer is in the scene (FitView is called
         // below), because before that the viewport size is not known and the first open used to land far off to the bottom right.
@@ -215,7 +244,7 @@ internal static class PerkTreeScreen
             if (xs.Count == 0) return;
             var min = new Vector2(xs.Min(), ys.Min()); var max = new Vector2(xs.Max(), ys.Max());
             var view = bg.GetViewport().GetVisibleRect().Size;
-            const float top = 110f;   // the info bar
+            var top = bar.Size.Y + 24f;
             var span = (max - min) + new Vector2(120, 120);
             zoom = Math.Clamp(Math.Min(view.X / span.X, (view.Y - top) / span.Y), 0.15f, 1.2f);
             var centre = (min + max) / 2;
@@ -286,6 +315,7 @@ internal static class PerkTreeScreen
             status.Text = $"Points: {state.UnspentPoints}    Taken: {state.Committed.Count}    Pending: {state.Pending.Count}    "
                 + (state.AllocationOpen ? "Allocation open (locks when you pick your next map node)" : "Allocation closed until the next map");
             refundAll.Disabled = state.Pending.Count == 0 || !state.AllocationOpen;
+            if (hoveredButton != null && hoveredButton.GetGlobalRect().HasPoint(bg.GetGlobalMousePosition())) ShowTooltip();
         }
 
         layer.SetMeta("refresh", Callable.From(Refresh));
@@ -294,29 +324,54 @@ internal static class PerkTreeScreen
         FitView();
         Refresh();
         bg.GrabFocus();
-        info.Text = "Drag to pan, mouse wheel to zoom. Click a node to take it, click a green (pending) node to give it back.";
     }
 
-    private static string Describe(TreeGraph graph, PerkState state, PerkText text, string nodeId)
+    private static HoverTip Describe(TreeGraph graph, PerkState state, PerkText text, string nodeId, string? error)
     {
         var node = graph.Node(nodeId);
         var effect = graph.EffectOf(node);
         var entry = text.For(effect.Id);
-        var chance = (node.Chance ?? effect.Chance) * 100m;
+        var baseChance = node.Chance ?? effect.Chance;
+        var isVigorProc = HandlerRegistry.Create(effect.Id) is VigorSpentProc;
+        ProcChancePreview Odds(IReadOnlyDictionary<string, EffectTotal> totals)
+        {
+            decimal Total(string id) => totals.TryGetValue(id, out var total) ? total.Effective : 0m;
+            return ProcChancePreview.Calculate(baseChance, Total("proc_boost"), Total("proc_double"), Total("proc_reroll"),
+                extraTries: isVigorProc && Total("vigor_proc_double") > 0 ? 1 : 0,
+                canRoll: !HandlerRegistry.GuaranteedOnly.Contains(effect.Id));
+        }
+        var chance = Odds(state.GetTotals(includePending: true));
+        var chanceText = ChanceText(chance.AtLeastOneChance, chance.RemainderChance, chance.GuaranteedProcs == 0 ? chance.Rolls : 1);
         var amount = entry.Percent ? node.Magnitude * 100m : node.Magnitude;
         var body = entry.Text
-            .Replace("{v}", Fmt(amount)).Replace("{u}", Fmt(amount)).Replace("{c}", Fmt(chance))
-            .Replace("{d}", Fmt(amount * 2)).Replace("{h}", Fmt(amount / 2)).Replace("{m}", "1");
+            .Replace("{v}", Fmt(amount)).Replace("{u}", Fmt(amount))
+            .Replace("{c}%", chanceText).Replace("{c}", Fmt(chance.AtLeastOneChance * 100m))
+            .Replace("{d}", Fmt(amount * 2)).Replace("{h}", Fmt(amount / 2)).Replace("{m}", Fmt(1 + node.Magnitude))
+            .Replace("{x}", Fmt(Math.Max(0, entry.Base - amount)));
         var sb = new StringBuilder();
-        sb.Append($"{entry.Name}  ({node.Tier})");
-        if (chance < 100 && !entry.Text.Contains("{c}")) sb.Append($"  {Fmt(chance)}% chance");
-        if (state.Committed.Contains(nodeId)) sb.Append("  [taken]");
-        else if (state.Pending.Contains(nodeId)) sb.Append("  [pending]");
-        sb.Append('\n').Append(body);
-        return sb.ToString();
+        if (baseChance != 1m && !entry.Text.Contains("{c}")) sb.Append($"{chanceText} Chance: ");
+        sb.Append(body);
+        if (chance.GuaranteedProcs > 0 && baseChance != 1m)
+        {
+            sb.Append($"\nPer trigger: {chance.GuaranteedProcs} guaranteed proc{(chance.GuaranteedProcs == 1 ? "" : "s")}");
+            if (chance.ExtraProcChance > 0)
+                sb.Append($" + {ChanceText(chance.ExtraProcChance, chance.RemainderChance, chance.Rolls)} chance of an extra proc");
+            sb.Append('.');
+        }
+        if (state.Committed.Contains(nodeId)) sb.Append("\nTaken");
+        if (effect.Scope == EffectScope.SharedEnemy) sb.Append("\nAffects enemies for all players.");
+        if (error != null) sb.Append('\n').Append(error);
+        var color = BaseOf(node).ToHtml(false);
+        var description = TooltipNumbers.Replace(sb.ToString(), match => match.Value.StartsWith('[')
+            ? match.Value : $"[color=#{color}]{match.Value}[/color]");
+        return PerkHoverTips.PerkTip(effect.Id, entry.Name, description);
     }
 
     private static string Fmt(decimal d) => d == Math.Round(d) ? ((int)d).ToString() : d.ToString("0.##");
+
+    private static string ChanceText(decimal combined, decimal perRoll, int rolls)
+        => $"{Fmt(combined * 100m)}%" + (rolls > 1 && perRoll > 0
+            ? $" ({Fmt(perRoll * 100m)}% × {rolls} rolls)" : "");
 
     private static string Explain(PerkOpResult r) => r switch
     {
@@ -332,7 +387,7 @@ internal static class PerkTreeScreen
 /// <summary>Display text exported by tools/export-mod.mjs as data/text.json. Missing file or entry falls back to the effect id.</summary>
 internal sealed class PerkText
 {
-    internal sealed record Entry(string Name, string Text, bool Percent, string? Icon);
+    internal sealed record Entry(string Name, string Text, bool Percent, string? Icon, decimal Base = 0);
 
     private readonly Dictionary<string, Entry> _entries;
     private static PerkText? _loaded;
@@ -356,7 +411,8 @@ internal sealed class PerkText
                     v.TryGetProperty("name", out var n) ? n.GetString() ?? p.Name : p.Name,
                     v.TryGetProperty("text", out var t) ? t.GetString() ?? "" : "",
                     v.TryGetProperty("percent", out var pc) && pc.ValueKind == JsonValueKind.True,
-                    v.TryGetProperty("icon", out var ic) && ic.ValueKind == JsonValueKind.String ? ic.GetString() : null);
+                    v.TryGetProperty("icon", out var ic) && ic.ValueKind == JsonValueKind.String ? ic.GetString() : null,
+                    v.TryGetProperty("base", out var b) && b.TryGetDecimal(out var baseValue) ? baseValue : 0);
             }
         }
         catch (Exception e)

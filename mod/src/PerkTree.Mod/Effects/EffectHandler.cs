@@ -251,9 +251,11 @@ internal abstract class EffectHandler
         if (targets.Count > 0) await PowerCmd.Apply<T>(ctx, targets, amount, Me, null, false);
     }
 
-    /// <summary>Channels one random Orb for the owner, picked by the game's own random-orb function from this effect's seeded stream.</summary>
+    /// <summary>Channels a fresh mutable copy of a random Orb selected with this effect's seeded stream.</summary>
     protected Task ChannelRandomOrb(PlayerChoiceContext ctx)
-        => OrbCmd.Channel(ctx, OrbModel.GetRandomOrb(Host.Rolls.StreamOf(Id)), Owner);
+        // GetRandomOrb returns a canonical ModelDb template. The non-generic Channel overload requires
+        // a mutable instance; passing the template aborts the combat turn loop before the first draw.
+        => OrbCmd.Channel(ctx, OrbModel.GetRandomOrb(Host.Rolls.StreamOf(Id)).ToMutable(), Owner);
 
     /// <summary>A non-interactive context for hooks that don't hand us one (the game does the same for relics that apply powers from them).</summary>
     protected static PlayerChoiceContext NoChoice() => new ThrowingPlayerChoiceContext();

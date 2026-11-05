@@ -171,7 +171,7 @@ if (!errors.length) {
   // Display text for the in-game tree (name, description template, unit label, default chance %). Kept out of effects.json
   // so the mod's validated catalog stays mechanics-only; the UI reads this file and shows the id when an entry is missing.
   const text = {};
-  for (const p of perksFile.perks) text[p.id] = {name: p.name || p.id, text: p.text || '', unit: p.unit_label || '', chance: p.chance ?? 100, percent: !!p.percent, icon: iconOf(p)};
+  for (const p of perksFile.perks) text[p.id] = {name: p.name || p.id, text: p.text || '', unit: p.unit_label || '', chance: p.chance ?? 100, percent: !!p.percent, base: p.base ?? 0, icon: iconOf(p)};
   writeFileSync(join(outDir, 'text.json'), JSON.stringify(text, null, 0) + '\n');
   writeFileSync(join(outDir, 'effects.json'), '{\n"schemaVersion":2,\n"effects":[\n' + effects.map(e => JSON.stringify(e)).join(',\n') + '\n]\n}\n');
 }
